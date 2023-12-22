@@ -1,10 +1,11 @@
 import { NestFactory } from '@nestjs/core';
-import { AppModule } from './app.module';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';
+import { Logger } from 'nestjs-pino';
+import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   Sentry.init({
     dsn: process.env.SENTRY_DSN,
@@ -16,6 +17,8 @@ async function bootstrap() {
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
   });
+
+  app.useLogger(app.get(Logger));
 
   await app.listen(3000);
 }

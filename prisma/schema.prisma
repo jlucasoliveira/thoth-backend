@@ -37,3 +37,11 @@ model Token {
 
   @@map("tokens")
 }
+
+model Brand {
+  id         String @id @default(uuid())
+  name       String
+  profitRate Float  @map("profit_rate")
+
+  @@map("brands")
+}

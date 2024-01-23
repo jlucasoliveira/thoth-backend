@@ -4,6 +4,7 @@ import { RavenInterceptor, RavenModule } from 'nest-raven';
 import { LoggerModule } from 'nestjs-pino';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
+import { BrandsModule } from './brands/brands.module';
 import { JwtAuthGuard } from './auth/jwt.guard';
 
 @Module({
@@ -20,6 +21,7 @@ import { JwtAuthGuard } from './auth/jwt.guard';
     }),
     UsersModule,
     AuthModule,
+    BrandsModule,
   ],
   providers: [
     {

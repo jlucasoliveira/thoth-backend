@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import { NestFactory } from '@nestjs/core';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';

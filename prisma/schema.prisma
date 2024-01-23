@@ -43,5 +43,23 @@ model Brand {
   name       String
   profitRate Float  @map("profit_rate")
 
+  products Product[]
+
   @@map("brands")
+}
+
+model Product {
+  id           String  @id @default(uuid())
+  name         String
+  externalCode String  @map("external_code")
+  weight       Float
+  barCode      String? @map("bar_code")
+  price        Float
+  volume       Float
+  icon         String
+
+  brand   Brand  @relation(fields: [brandId], references: [id])
+  brandId String @map("brand_id")
+
+  @@map("products")
 }

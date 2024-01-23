@@ -1,0 +1,15 @@
+meta {
+  name: Delete
+  type: http
+  seq: 5
+}
+
+delete {
+  url: {{base_url}}/brands/d4326b39-1d7b-4d0b-b115-e652d02c8abf
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

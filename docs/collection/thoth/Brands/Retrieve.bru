@@ -1,0 +1,15 @@
+meta {
+  name: Retrieve
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/brands/e924598c-ba6d-48cc-8395-3ca3e05dd3c7
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

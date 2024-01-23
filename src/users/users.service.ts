@@ -44,9 +44,7 @@ export class UsersService {
   }
 
   async update(id: string, updateUserDto: UpdateUserDto) {
-    const user = await this.findOne(id);
-
-    if (!user) throw new NotFoundException('Usuário não encontrado');
+    await this.findOne(id);
 
     return this.prismaService.user.update({
       where: { id },
@@ -55,9 +53,7 @@ export class UsersService {
   }
 
   async remove(id: string) {
-    const user = await this.findOne(id);
-
-    if (!user) throw new NotFoundException('Usuário não encontrado');
+    await this.findOne(id);
 
     return await this.prismaService.user.delete({ where: { id } });
   }

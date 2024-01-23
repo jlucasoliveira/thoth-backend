@@ -1,0 +1,15 @@
+meta {
+  name: Retrieve
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{base_url}}/users/432846cd-0aec-4964-b4b0-512dbc04d136
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

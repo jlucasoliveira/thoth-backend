@@ -1,0 +1,21 @@
+meta {
+  name: Update
+  type: http
+  seq: 2
+}
+
+patch {
+  url: {{base_url}}/users/432846cd-0aec-4964-b4b0-512dbc04d136
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "isAdmin": false
+  }
+}

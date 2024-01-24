@@ -39,9 +39,11 @@ model Token {
 }
 
 model Brand {
-  id         String @id @default(uuid())
+  id         String    @id @default(uuid())
   name       String
-  profitRate Float  @map("profit_rate")
+  profitRate Float     @map("profit_rate")
+  createdAt  DateTime? @default(now()) @map("created_at")
+  updatedAt  DateTime? @updatedAt @map("updated_at")
 
   products Product[]
 
@@ -49,14 +51,16 @@ model Brand {
 }
 
 model Product {
-  id           String  @id @default(uuid())
+  id           String    @id @default(uuid())
   name         String
-  externalCode String  @map("external_code")
+  externalCode String    @map("external_code")
   weight       Float
-  barCode      String? @map("bar_code")
+  barCode      String?   @map("bar_code")
   price        Float
   volume       Float
   icon         String
+  createdAt    DateTime? @default(now()) @map("created_at")
+  updatedAt    DateTime? @updatedAt @map("updated_at")
 
   brand   Brand  @relation(fields: [brandId], references: [id])
   brandId String @map("brand_id")
@@ -68,8 +72,10 @@ model Product {
 }
 
 model Category {
-  id   String @id @default(uuid())
-  name String
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
 
   products Product[]
 

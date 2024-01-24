@@ -61,5 +61,17 @@ model Product {
   brand   Brand  @relation(fields: [brandId], references: [id])
   brandId String @map("brand_id")
 
+  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId String   @map("category_id")
+
   @@map("products")
+}
+
+model Category {
+  id   String @id @default(uuid())
+  name String
+
+  products Product[]
+
+  @@map("categories")
 }

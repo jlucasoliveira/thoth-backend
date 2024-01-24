@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { UsersModule } from '@/users/users.module';
-import { UsersService } from '@/users/users.service';
 import { PrismaService } from '@/prima.service';
 import { JwtStrategy } from './jwt.strategy';
 import { AuthController } from './auth.controller';
@@ -18,7 +17,7 @@ import { jwtConfig } from './constants';
       signOptions: { expiresIn: jwtConfig.expires },
     }),
   ],
-  providers: [UsersService, AuthService, JwtStrategy, PrismaService],
+  providers: [AuthService, JwtStrategy, PrismaService],
   exports: [AuthService],
   controllers: [AuthController],
 })

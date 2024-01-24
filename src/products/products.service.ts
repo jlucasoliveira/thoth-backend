@@ -1,9 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateProductDto } from './dto/create-product.dto';
-import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
+import { GendersService } from '@/genders/genders.service';
+import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -11,6 +12,7 @@ export class ProductsService {
     private readonly prismaService: PrismaService,
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
+    private readonly gendersService: GendersService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -50,6 +52,13 @@ export class ProductsService {
       updateProductDto.categoryId !== product.categoryId
     ) {
       await this.categoriesService.findOne(updateProductDto.categoryId);
+    }
+
+    if (
+      updateProductDto.genderId &&
+      updateProductDto.genderId !== product.genderId
+    ) {
+      await this.gendersService.findOne(updateProductDto.genderId);
     }
 
     return this.prismaService.product.update({

@@ -3,12 +3,14 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
+import { CategoriesService } from '@/categories/categories.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
     private readonly prismaService: PrismaService,
     private readonly brandsService: BrandsService,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
@@ -41,6 +43,13 @@ export class ProductsService {
       product.brandId !== updateProductDto.brandId
     ) {
       await this.brandsService.findOne(updateProductDto.brandId);
+    }
+
+    if (
+      updateProductDto.categoryId &&
+      updateProductDto.categoryId !== product.categoryId
+    ) {
+      await this.categoriesService.findOne(updateProductDto.categoryId);
     }
 
     return this.prismaService.product.update({

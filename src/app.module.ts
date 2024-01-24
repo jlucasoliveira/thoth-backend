@@ -8,6 +8,7 @@ import { BrandsModule } from './brands/brands.module';
 import { JwtAuthGuard } from './auth/jwt.guard';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
+import { GendersModule } from './genders/genders.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CategoriesModule } from './categories/categories.module';
     BrandsModule,
     ProductsModule,
     CategoriesModule,
+    GendersModule,
   ],
   providers: [
     {

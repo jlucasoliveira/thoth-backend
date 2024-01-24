@@ -71,6 +71,8 @@ model Product {
   gender   Gender @relation(fields: [genderId], references: [id])
   genderId String @map("gender_id")
 
+  prices Prices[]
+
   @@map("products")
 }
 
@@ -94,4 +96,16 @@ model Gender {
   products Product[]
 
   @@map("genders")
+}
+
+model Prices {
+  id        String    @id @default(uuid())
+  price     Float
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("product_id")
+
+  @@map("prices")
 }

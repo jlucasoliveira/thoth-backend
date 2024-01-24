@@ -1,10 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  forwardRef,
+} from '@nestjs/common';
 import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
 import { GendersService } from '@/genders/genders.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { PricesService } from '@/prices/prices.service';
 
 @Injectable()
 export class ProductsService {
@@ -13,14 +19,20 @@ export class ProductsService {
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
     private readonly gendersService: GendersService,
+    @Inject(forwardRef(() => PricesService))
+    private readonly pricesService: PricesService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
     await this.brandsService.findOne(createProductDto.brandId);
 
-    return this.prismaService.product.create({
+    const product = await this.prismaService.product.create({
       data: createProductDto,
     });
+
+    this.pricesService.create(product.id, createProductDto, false);
+
+    return product;
   }
 
   findAll() {

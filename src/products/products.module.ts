@@ -5,7 +5,6 @@ import { PrismaService } from '@/prima.service';
 import { BrandsModule } from '@/brands/brands.module';
 import { CategoriesModule } from '@/categories/categories.module';
 import { GendersModule } from '@/genders/genders.module';
-import { PricesService } from '../prices/prices.service';
 import { PricesModule } from '@/prices/prices.module';
 
 @Module({
@@ -16,7 +15,7 @@ import { PricesModule } from '@/prices/prices.module';
     forwardRef(() => PricesModule),
   ],
   controllers: [ProductsController],
-  providers: [ProductsService, PricesService, PrismaService],
+  providers: [ProductsService, PrismaService],
   exports: [ProductsService],
 })
 export class ProductsModule {}

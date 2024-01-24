@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { PrismaService } from '@/prima.service';
 import { CreatePriceDto } from './dto/create-price.dto';
 import { ProductsService } from '../products/products.service';
@@ -7,17 +7,23 @@ import { ProductsService } from '../products/products.service';
 export class PricesService {
   constructor(
     private readonly prismaService: PrismaService,
+    @Inject(forwardRef(() => ProductsService))
     private readonly productsService: ProductsService,
   ) {}
 
-  async create(productId: string, payload: CreatePriceDto) {
+  async create(
+    productId: string,
+    payload: CreatePriceDto,
+    updateProduct = true,
+  ) {
     const product = await this.productsService.findOne(productId);
 
     const price = await this.prismaService.prices.create({
       data: { ...payload, productId },
     });
 
-    await this.productsService.update(product.id, { price: payload.price });
+    if (updateProduct)
+      await this.productsService.update(product.id, { price: payload.price });
 
     return price;
   }

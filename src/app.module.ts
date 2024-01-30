@@ -10,6 +10,7 @@ import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { GendersModule } from './genders/genders.module';
 import { PricesModule } from './prices/prices.module';
+import { StockModule } from './stock/stock.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { PricesModule } from './prices/prices.module';
     CategoriesModule,
     GendersModule,
     PricesModule,
+    StockModule,
   ],
   providers: [
     {

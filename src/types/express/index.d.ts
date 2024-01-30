@@ -1,10 +1,12 @@
-type LocalUser = {
+type CustomUser = {
   username: string;
   id: string;
 };
 
-declare namespace Express {
-  export interface Request {
-    user: LocalUser;
+export type LocalUser = CustomUser;
+
+declare global {
+  namespace Express {
+    interface User extends CustomUser {}
   }
 }

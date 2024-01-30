@@ -6,10 +6,16 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { Category } from '@prisma/client';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { OrderBy } from '@/shared/pagination/filters';
 
 @Controller('categories')
 export class CategoriesController {
@@ -21,8 +27,13 @@ export class CategoriesController {
   }
 
   @Get()
-  findAll() {
-    return this.categoriesService.findAll();
+  findAll(
+    @Query('filters', FilterPipe) where: Filter<Category>,
+    @Query('sort', SortPipe) orderBy: OrderBy<Category>,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('take', ParseIntPipe) take: number = 10,
+  ) {
+    return this.categoriesService.findAll({ where, orderBy, skip, take });
   }
 
   @Get(':id')

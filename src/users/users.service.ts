@@ -3,6 +3,9 @@ import * as bcrypt from 'bcrypt';
 import { PrismaService } from 'src/prima.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { PageOptions } from '@/shared/pagination/filters';
+import { User } from '@prisma/client';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class UsersService {
@@ -21,8 +24,15 @@ export class UsersService {
     });
   }
 
-  findAll() {
-    return this.prismaService.user.findMany();
+  async findAll(props: PageOptions<User>) {
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.user.findMany(props),
+      this.prismaService.user.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 
   async findOne(id: string) {

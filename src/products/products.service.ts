@@ -4,13 +4,16 @@ import {
   NotFoundException,
   forwardRef,
 } from '@nestjs/common';
+import { Product } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
+import { PricesService } from '@/prices/prices.service';
 import { GendersService } from '@/genders/genders.service';
+import { PageOptions } from '@/shared/pagination/filters';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PricesService } from '@/prices/prices.service';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class ProductsService {
@@ -35,8 +38,15 @@ export class ProductsService {
     return product;
   }
 
-  findAll() {
-    return this.prismaService.product.findMany();
+  async findAll(props: PageOptions<Product>) {
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.product.findMany(props),
+      this.prismaService.product.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 
   async findOne(id: string) {

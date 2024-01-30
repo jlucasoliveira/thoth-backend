@@ -1,4 +1,16 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from '@nestjs/common';
+import { Prices } from '@prisma/client';
+import { OrderBy } from '@/shared/pagination/filters';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { CreatePriceDto } from './dto/create-price.dto';
 import { PricesService } from './prices.service';
 
@@ -15,7 +27,18 @@ export class PricesController {
   }
 
   @Get()
-  findAll(@Param('productId') productId: string) {
-    return this.pricesService.findAll(productId);
+  findAll(
+    @Param('productId') productId: string,
+    @Query('filters', FilterPipe) where: Filter<Prices>,
+    @Query('sort', SortPipe) orderBy: OrderBy<Prices>,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('take', ParseIntPipe) take: number = 10,
+  ) {
+    return this.pricesService.findAll(productId, {
+      where,
+      orderBy,
+      skip,
+      take,
+    });
   }
 }

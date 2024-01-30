@@ -6,7 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
+import { Product } from '@prisma/client';
+import { OrderBy } from '@/shared/pagination/filters';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { ProductsService } from './products.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,8 +27,13 @@ export class ProductsController {
   }
 
   @Get()
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Query('filters', FilterPipe) where: Filter<Product>,
+    @Query('sort', SortPipe) orderBy: OrderBy<Product>,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('take', ParseIntPipe) take: number = 10,
+  ) {
+    return this.productsService.findAll({ orderBy, skip, take, where });
   }
 
   @Get(':id')

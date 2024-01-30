@@ -6,10 +6,16 @@ import {
   Param,
   Delete,
   Controller,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { OrderBy } from '@/shared/pagination/filters';
+import { User } from '@prisma/client';
 
 @Controller('users')
 export class UsersController {
@@ -21,8 +27,13 @@ export class UsersController {
   }
 
   @Get()
-  findAll() {
-    return this.usersService.findAll();
+  findAll(
+    @Query('filters', FilterPipe) where: Filter<User>,
+    @Query('sort', SortPipe) orderBy: OrderBy<User>,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('take', ParseIntPipe) take: number = 10,
+  ) {
+    return this.usersService.findAll({ where, orderBy, skip, take });
   }
 
   @Get(':id')

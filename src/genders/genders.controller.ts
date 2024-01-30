@@ -6,7 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  ParseIntPipe,
 } from '@nestjs/common';
+import { Gender } from '@prisma/client';
+import { OrderBy } from '@/shared/pagination/filters';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { GendersService } from './genders.service';
 import { CreateGenderDto } from './dto/create-gender.dto';
 import { UpdateGenderDto } from './dto/update-gender.dto';
@@ -21,8 +27,13 @@ export class GendersController {
   }
 
   @Get()
-  findAll() {
-    return this.gendersService.findAll();
+  findAll(
+    @Query('filters', FilterPipe) where: Filter<Gender>,
+    @Query('sort', SortPipe) orderBy: OrderBy<Gender>,
+    @Query('skip', ParseIntPipe) skip: number = 0,
+    @Query('take', ParseIntPipe) take: number = 10,
+  ) {
+    return this.gendersService.findAll({ where, orderBy, skip, take });
   }
 
   @Get(':id')

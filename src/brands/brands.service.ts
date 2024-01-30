@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prima.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
+import { Brand } from '@prisma/client';
+import { PageOptions } from '@/shared/pagination/filters';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class BrandsService {
@@ -11,8 +14,15 @@ export class BrandsService {
     return this.prismaService.brand.create({ data });
   }
 
-  findAll() {
-    return this.prismaService.brand.findMany();
+  async findAll(props: PageOptions<Brand>) {
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.brand.findMany(props),
+      this.prismaService.brand.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 
   async findOne(id: string) {

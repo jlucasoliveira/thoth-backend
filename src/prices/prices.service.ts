@@ -1,7 +1,10 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Prices } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { CreatePriceDto } from './dto/create-price.dto';
 import { ProductsService } from '../products/products.service';
+import { PageOptions } from '@/shared/pagination/filters';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class PricesService {
@@ -28,7 +31,15 @@ export class PricesService {
     return price;
   }
 
-  findAll(productId: string) {
-    return this.prismaService.prices.findMany({ where: { productId } });
+  async findAll(productId: string, props: PageOptions<Prices>) {
+    props.where.productId = productId;
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.prices.findMany(props),
+      this.prismaService.prices.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 }

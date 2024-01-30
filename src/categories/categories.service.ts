@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from '@/prima.service';
+import { PageOptions } from '@/shared/pagination/filters';
+import { Category } from '@prisma/client';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class CategoriesService {
@@ -13,8 +16,15 @@ export class CategoriesService {
     });
   }
 
-  findAll() {
-    return this.prismaService.category.findMany();
+  async findAll(props: PageOptions<Category>) {
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.category.findMany(props),
+      this.prismaService.category.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 
   async findOne(id: string) {

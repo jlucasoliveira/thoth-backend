@@ -2,6 +2,9 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prima.service';
 import { CreateGenderDto } from './dto/create-gender.dto';
 import { UpdateGenderDto } from './dto/update-gender.dto';
+import { PageOptions } from '@/shared/pagination/filters';
+import { Gender } from '@prisma/client';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class GendersService {
@@ -13,8 +16,15 @@ export class GendersService {
     });
   }
 
-  findAll() {
-    return this.prismaService.gender.findMany();
+  async findAll(props: PageOptions<Gender>) {
+    const [data, total] = await this.prismaService.$transaction([
+      this.prismaService.gender.findMany(props),
+      this.prismaService.gender.count(),
+    ]);
+
+    const meta = new PageMetaDto({ itens: data.length, total, ...props });
+
+    return { data, meta };
   }
 
   async findOne(id: string) {

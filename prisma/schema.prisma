@@ -21,7 +21,8 @@ model User {
   createdAt   DateTime  @default(now()) @map("created_at")
   updatedAt   DateTime  @updatedAt @map("updated_at")
 
-  tokens Token[]
+  tokens       Token[]
+  stockEntries StockEntry[]
 
   @@index([username])
   @@map("users")
@@ -71,6 +72,8 @@ model Product {
   gender   Gender @relation(fields: [genderId], references: [id])
   genderId String @map("gender_id")
 
+  stock Stock?
+
   prices Prices[]
 
   @@map("products")
@@ -107,5 +110,76 @@ model Prices {
   product   Product @relation(fields: [productId], references: [id])
   productId String  @map("product_id")
 
+  entry StockEntry?
+
   @@map("prices")
+}
+
+model Stock {
+  id        String   @id @default(uuid())
+  quantity  Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  entries   StockEntry[]
+  locations StockLocation[]
+
+  product   Product? @relation(fields: [productId], references: [id])
+  productId String?  @unique @map("product_id")
+
+  @@map("stocks")
+}
+
+enum StockKind {
+  ENTRY
+  REMOVAL
+  LOSE
+}
+
+model StockEntry {
+  id             String    @id @default(uuid())
+  entryDate      DateTime  @default(now()) @map("entry_date")
+  costPrice      Float     @map("cost_price")
+  expirationDate DateTime  @map("expiration_date")
+  amount         Int
+  kind           StockKind
+  createdAt      DateTime  @default(now()) @map("created_at")
+  updatedAt      DateTime  @updatedAt @map("updated_at")
+
+  price   Prices? @relation(fields: [priceId], references: [id])
+  priceId String? @unique @map("price_id")
+
+  stock   Stock  @relation(fields: [stockId], references: [id])
+  stockId String @map("stock_id")
+
+  user   User   @relation(fields: [userId], references: [id])
+  userId String @map("user_id")
+
+  @@map("stock_entries")
+}
+
+model StockLocation {
+  id        String   @id @default(uuid())
+  quantity  Int
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  stock   Stock  @relation(fields: [stockId], references: [id])
+  stockId String @map("stock_id")
+
+  location   Location @relation(fields: [locationId], references: [id])
+  locationId String   @map("location_id")
+
+  @@map("stock_locations")
+}
+
+model Location {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  stockLocations StockLocation[]
+
+  @@map("locations")
 }

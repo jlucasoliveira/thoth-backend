@@ -12,7 +12,7 @@ export class AuthService {
   ) {}
 
   async validateUser(username: string, password: string) {
-    const user = await this.usersService.findOneByUsername(username);
+    const user = await this.usersService.findOneByUsername(username, true);
 
     const hasValidPassword = await bcrypt.compare(password, user.password);
 
@@ -29,6 +29,8 @@ export class AuthService {
       username,
       sub: user.id,
     });
+
+    await this.usersService.update(user.id, { lastLogin: new Date() });
 
     return { accessToken };
   }

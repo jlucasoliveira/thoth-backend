@@ -30,8 +30,8 @@ export class ProductsController {
   findAll(
     @Query('filters', FilterPipe) where: Filter<Product>,
     @Query('sort', SortPipe) orderBy: OrderBy<Product>,
-    @Query('skip', ParseIntPipe) skip: number = 0,
-    @Query('take', ParseIntPipe) take: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
+    @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.productsService.findAll({ orderBy, skip, take, where });
   }

@@ -30,8 +30,8 @@ export class GendersController {
   findAll(
     @Query('filters', FilterPipe) where: Filter<Gender>,
     @Query('sort', SortPipe) orderBy: OrderBy<Gender>,
-    @Query('skip', ParseIntPipe) skip: number = 0,
-    @Query('take', ParseIntPipe) take: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
+    @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.gendersService.findAll({ where, orderBy, skip, take });
   }

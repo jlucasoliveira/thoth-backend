@@ -30,8 +30,8 @@ export class UsersController {
   findAll(
     @Query('filters', FilterPipe) where: Filter<User>,
     @Query('sort', SortPipe) orderBy: OrderBy<User>,
-    @Query('skip', ParseIntPipe) skip: number = 0,
-    @Query('take', ParseIntPipe) take: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
+    @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.usersService.findAll({ where, orderBy, skip, take });
   }

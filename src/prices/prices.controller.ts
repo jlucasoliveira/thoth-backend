@@ -31,8 +31,8 @@ export class PricesController {
     @Param('productId') productId: string,
     @Query('filters', FilterPipe) where: Filter<Prices>,
     @Query('sort', SortPipe) orderBy: OrderBy<Prices>,
-    @Query('skip', ParseIntPipe) skip: number = 0,
-    @Query('take', ParseIntPipe) take: number = 10,
+    @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
+    @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.pricesService.findAll(productId, {
       where,

@@ -5,7 +5,7 @@ import { LoggerModule } from 'nestjs-pino';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { BrandsModule } from './brands/brands.module';
-import { JwtAuthGuard } from './auth/jwt.guard';
+import { JwtAuthGuard } from './auth/guards/jwt.guard';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
 import { GendersModule } from './genders/genders.module';

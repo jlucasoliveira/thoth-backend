@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
-import { User } from '@/auth/user.decorator';
+import { User } from '@/auth/guards/user.decorator';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';

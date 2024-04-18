@@ -2,7 +2,7 @@ import { Request } from 'express';
 import { Body, Controller, Get, Post, Req } from '@nestjs/common';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
-import { Public } from './public.decorator';
+import { Public } from './guards/public.decorator';
 
 @Controller('auth')
 export class AuthController {

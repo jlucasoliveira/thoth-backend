@@ -11,6 +11,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { GendersModule } from './genders/genders.module';
 import { PricesModule } from './prices/prices.module';
 import { StockModule } from './stock/stock.module';
+import { TokensModule } from './tokens/tokens.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { StockModule } from './stock/stock.module';
     GendersModule,
     PricesModule,
     StockModule,
+    TokensModule,
   ],
   providers: [
     {

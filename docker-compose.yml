@@ -16,16 +16,16 @@ services:
       - db
 
   db:
-    image: postgres
+    image: postgres:16.2-alpine3.18
     container_name: thoth-db
     tty: true
     ports:
       - "5432:5432"
     volumes:
-      - thoth-pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql/data
     env_file:
       - .env
 
 volumes:
-  thoth-pg-data:
+  pg-data:
     external: true

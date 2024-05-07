@@ -183,3 +183,35 @@ model Location {
 
   @@map("locations")
 }
+
+model Attachment {
+  id        String   @id @default(uuid())
+  hash      String?
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  sizes AttachmentSize[]
+
+  @@map("attachments")
+}
+
+enum SizeKind {
+  XS
+  S
+  MD
+  L
+  XL
+}
+
+model AttachmentSize {
+  id        String   @id @default(uuid())
+  key       String
+  size      SizeKind
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  attachment   Attachment @relation(fields: [attachmentId], references: [id])
+  attachmentId String     @map("attachment_id")
+
+  @@map("attachments_sizes")
+}

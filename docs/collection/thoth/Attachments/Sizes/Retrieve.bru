@@ -1,0 +1,19 @@
+meta {
+  name: Retrieve
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/attachments/278b206c-39a5-426b-bd55-f7722c5defcc?size=L
+  body: none
+  auth: bearer
+}
+
+query {
+  size: L
+}
+
+auth:bearer {
+  token: {{token}}
+}

@@ -1,0 +1,23 @@
+meta {
+  name: Upload
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/attachments?resource=products
+  body: multipartForm
+  auth: bearer
+}
+
+query {
+  resource: products
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:multipart-form {
+  file: @file(/home/jlucasoliveira/Documentos/development/thoth/thoth-webadmin/src/assets/images/logo.png)
+}

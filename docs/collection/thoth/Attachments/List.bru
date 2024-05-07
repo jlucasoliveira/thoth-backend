@@ -1,0 +1,15 @@
+meta {
+  name: List
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/attachments
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

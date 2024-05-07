@@ -1,0 +1,15 @@
+meta {
+  name: List
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{base_url}}/attachments/99a9ae8e-42f9-43f1-b69f-a67adfafdac9/sizes
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}

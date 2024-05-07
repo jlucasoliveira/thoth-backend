@@ -12,17 +12,17 @@ import { GendersModule } from './genders/genders.module';
 import { PricesModule } from './prices/prices.module';
 import { StockModule } from './stock/stock.module';
 import { TokensModule } from './tokens/tokens.module';
+import { AttachmentsModule } from './attachments/attachments.module';
+import { NODE_ENV } from './config/configuration';
 
 @Module({
   imports: [
     RavenModule,
     LoggerModule.forRoot({
       pinoHttp: {
-        level: process.env.NODE_ENV === 'production' ? 'info' : 'debug',
+        level: NODE_ENV === 'production' ? 'info' : 'debug',
         transport:
-          process.env.NODE_ENV === 'production'
-            ? undefined
-            : { target: 'pino-pretty' },
+          NODE_ENV === 'production' ? undefined : { target: 'pino-pretty' },
       },
     }),
     UsersModule,
@@ -34,6 +34,7 @@ import { TokensModule } from './tokens/tokens.module';
     PricesModule,
     StockModule,
     TokensModule,
+    AttachmentsModule,
   ],
   providers: [
     {

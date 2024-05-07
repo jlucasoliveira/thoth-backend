@@ -21,7 +21,6 @@ export class PageMetaDto {
   readonly hasNextPage: boolean;
 
   constructor(props: Props) {
-    console.log(props);
     this.itens = props.itens;
     this.total = props.total;
     this.limit = Number(props.take || 10);

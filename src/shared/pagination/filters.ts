@@ -32,7 +32,7 @@ function convert(input: any): any {
   const number = Number(input);
   if (!isNaN(number)) return number;
 
-  const inDate = new Date();
+  const inDate = new Date(input);
   if (inDate.toString() !== 'Invalid Date') return inDate;
 
   return input;
@@ -48,8 +48,6 @@ export function parseFilterIntoQueryWhere<EntityType>(
   Object.keys(filter).forEach((key) => {
     const filterValue = filter[key];
     const operator = Object.keys(filterValue)[0];
-    const obj: EntityType = {} as EntityType;
-    console.log('teste', typeof obj[key]);
 
     switch (operator) {
       case 'eq':

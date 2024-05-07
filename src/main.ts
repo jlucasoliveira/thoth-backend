@@ -4,12 +4,14 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
+import { PORT, SENTRY_CONFIG } from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   Sentry.init({
-    dsn: process.env.SENTRY_DSN,
+    enabled: SENTRY_CONFIG.isEnabled,
+    dsn: SENTRY_CONFIG.dsn,
     integrations: [
       new Sentry.Integrations.Http({ tracing: true }),
       new Sentry.Integrations.Express({ app: app.getHttpServer() }),
@@ -22,6 +24,7 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.setGlobalPrefix('/api/v1');
 
-  await app.listen(3000);
+  await app.listen(PORT);
 }
+
 bootstrap();

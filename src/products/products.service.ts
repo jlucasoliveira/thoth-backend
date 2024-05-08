@@ -28,6 +28,8 @@ export class ProductsService {
 
   async create(createProductDto: CreateProductDto) {
     await this.brandsService.findOne(createProductDto.brandId);
+    await this.gendersService.findOne(createProductDto.genderId);
+    await this.categoriesService.findOne(createProductDto.categoryId);
 
     const product = await this.prismaService.product.create({
       data: createProductDto,

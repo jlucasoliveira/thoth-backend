@@ -51,6 +51,12 @@ model Brand {
   @@map("brands")
 }
 
+enum Gender {
+  Male
+  Female
+  None
+}
+
 model Product {
   id           String    @id @default(uuid())
   name         String
@@ -60,6 +66,7 @@ model Product {
   price        Float
   volume       Float
   icon         String
+  gender       Gender?
   createdAt    DateTime? @default(now()) @map("created_at")
   updatedAt    DateTime? @updatedAt @map("updated_at")
 

@@ -1,10 +1,12 @@
 import {
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
 } from 'class-validator';
+import { Gender } from '@prisma/client';
 
 export class CreateProductDto {
   @IsString()
@@ -41,4 +43,8 @@ export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   categoryId: string;
+
+  @IsEnum(Gender)
+  @IsNotEmpty()
+  gender: Gender;
 }

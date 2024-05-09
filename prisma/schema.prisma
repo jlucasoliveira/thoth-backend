@@ -69,11 +69,7 @@ model Product {
   category   Category @relation(fields: [categoryId], references: [id])
   categoryId String   @map("category_id")
 
-  gender   Gender @relation(fields: [genderId], references: [id])
-  genderId String @map("gender_id")
-
-  stock Stock?
-
+  stock  Stock?
   prices Prices[]
 
   @@map("products")
@@ -88,17 +84,6 @@ model Category {
   products Product[]
 
   @@map("categories")
-}
-
-model Gender {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  products Product[]
-
-  @@map("genders")
 }
 
 model Prices {

@@ -8,7 +8,6 @@ import { BrandsModule } from './brands/brands.module';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
 import { ProductsModule } from './products/products.module';
 import { CategoriesModule } from './categories/categories.module';
-import { GendersModule } from './genders/genders.module';
 import { PricesModule } from './prices/prices.module';
 import { StockModule } from './stock/stock.module';
 import { TokensModule } from './tokens/tokens.module';
@@ -30,7 +29,6 @@ import { NODE_ENV } from './config/configuration';
     BrandsModule,
     ProductsModule,
     CategoriesModule,
-    GendersModule,
     PricesModule,
     StockModule,
     TokensModule,

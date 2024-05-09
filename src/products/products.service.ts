@@ -9,7 +9,6 @@ import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
 import { PricesService } from '@/prices/prices.service';
-import { GendersService } from '@/genders/genders.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -21,14 +20,12 @@ export class ProductsService {
     private readonly prismaService: PrismaService,
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
-    private readonly gendersService: GendersService,
     @Inject(forwardRef(() => PricesService))
     private readonly pricesService: PricesService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
     await this.brandsService.findOne(createProductDto.brandId);
-    await this.gendersService.findOne(createProductDto.genderId);
     await this.categoriesService.findOne(createProductDto.categoryId);
 
     const product = await this.prismaService.product.create({
@@ -76,13 +73,6 @@ export class ProductsService {
       updateProductDto.categoryId !== product.categoryId
     ) {
       await this.categoriesService.findOne(updateProductDto.categoryId);
-    }
-
-    if (
-      updateProductDto.genderId &&
-      updateProductDto.genderId !== product.genderId
-    ) {
-      await this.gendersService.findOne(updateProductDto.genderId);
     }
 
     return this.prismaService.product.update({

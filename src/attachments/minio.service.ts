@@ -5,6 +5,11 @@ import { MINIO_CONFIG } from '@/config/configuration';
 import { MINIO_PROVIDER } from './minio.provider';
 import { Attachment } from '@prisma/client';
 
+type UniqueFileName = {
+  filename: string;
+  basename: string;
+};
+
 @Injectable()
 export class MinIOService {
   constructor(
@@ -36,13 +41,16 @@ export class MinIOService {
     attachment: Attachment,
     filename: string,
     sfx?: string,
-  ): [string, string] {
+  ): UniqueFileName {
     const ext = extname(filename);
 
-    const [file] = filename.split(ext);
-    const name = file + attachment.id;
+    const file = filename.replace(ext, '');
+    const basename = file + attachment.id;
 
-    return [name + sfx + ext, name];
+    return {
+      basename,
+      filename: basename + (sfx ?? '') + ext,
+    };
   }
 
   async putFile(
@@ -52,8 +60,12 @@ export class MinIOService {
     resource = 'content',
     sfx?: string,
   ) {
-    const [_filename, name] = this.uniqueFilename(attachment, filename, sfx);
-    const path = this.createFolderName(resource, name, _filename);
+    const { filename: name, basename } = this.uniqueFilename(
+      attachment,
+      filename,
+      sfx,
+    );
+    const path = this.createFolderName(resource, basename, name);
 
     await this.minio.putObject(MINIO_CONFIG.bucket, path, file);
 

@@ -40,7 +40,7 @@ export class StockController {
   @Get('entries')
   findAllByProductId(
     @Param('productId', ParseUUIDPipe) productId: string,
-    @Query('filters', FilterPipe) where: Filter<StockEntry>,
+    @Query('filter', FilterPipe) where: Filter<StockEntry>,
     @Query('sort', SortPipe) orderBy: OrderBy<StockEntry>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
@@ -56,7 +56,7 @@ export class StockController {
   @Get(':id/entries')
   findAll(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('filters', FilterPipe) where: Filter<StockEntry>,
+    @Query('filter', FilterPipe) where: Filter<StockEntry>,
     @Query('sort', SortPipe) orderBy: OrderBy<StockEntry>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

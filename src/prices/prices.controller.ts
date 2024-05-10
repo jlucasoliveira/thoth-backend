@@ -29,7 +29,7 @@ export class PricesController {
   @Get()
   findAll(
     @Param('productId') productId: string,
-    @Query('filters', FilterPipe) where: Filter<Prices>,
+    @Query('filter', FilterPipe) where: Filter<Prices>,
     @Query('sort', SortPipe) orderBy: OrderBy<Prices>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

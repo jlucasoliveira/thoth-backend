@@ -23,7 +23,7 @@ export class BrandsController {
 
   @Get()
   findAll(
-    @Query('filters', FilterPipe) where: Filter<Brand>,
+    @Query('filter', FilterPipe) where: Filter<Brand>,
     @Query('sort', SortPipe) orderBy: OrderBy<Brand>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

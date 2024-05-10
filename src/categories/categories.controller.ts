@@ -28,7 +28,7 @@ export class CategoriesController {
 
   @Get()
   findAll(
-    @Query('filters', FilterPipe) where: Filter<Category>,
+    @Query('filter', FilterPipe) where: Filter<Category>,
     @Query('sort', SortPipe) orderBy: OrderBy<Category>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

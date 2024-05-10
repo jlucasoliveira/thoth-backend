@@ -148,14 +148,16 @@ export class AttachmentsService {
         data: sizes,
       });
     } catch (error) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const [_, folderName] = this.minioService.uniqueFilename(
-        attachment,
-        file.originalname,
+      await this.minioService.deleteFiles(
+        images.map(
+          ({ size }) =>
+            this.minioService.uniqueFilename(
+              attachment,
+              file.originalname,
+              size,
+            ).basename,
+        ),
       );
-      const folder = this.minioService.createFolderName(resource, folderName);
-      await this.minioService.deleteFiles([folder]);
-
       throw error;
     }
   }
@@ -166,7 +168,7 @@ export class AttachmentsService {
     file: Express.Multer.File,
     resource?: string,
   ) {
-    await this.minioService.putFile(
+    const key = await this.minioService.putFile(
       attachment,
       file.buffer,
       file.originalname,
@@ -174,11 +176,7 @@ export class AttachmentsService {
     );
 
     return await transaction.attachmentSize.createMany({
-      data: {
-        size: SizeKind.MD,
-        key: file.originalname,
-        attachmentId: attachment.id,
-      },
+      data: { key, size: SizeKind.MD, attachmentId: attachment.id },
     });
   }
 
@@ -197,7 +195,6 @@ export class AttachmentsService {
 
     return await transaction.attachment.findFirst({
       where: { id: attachment.id },
-      include: { sizes: true },
     });
   }
 

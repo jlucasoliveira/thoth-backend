@@ -65,10 +65,13 @@ model Product {
   barCode      String?   @map("bar_code")
   price        Float
   volume       Float
-  icon         String
   gender       Gender?
   createdAt    DateTime? @default(now()) @map("created_at")
   updatedAt    DateTime? @updatedAt @map("updated_at")
+
+  iconId String?      @map("icon_id")
+  icon   Attachment?  @relation(name: "icon", fields: [iconId], references: [id])
+  images Attachment[] @relation("images")
 
   brand   Brand  @relation(fields: [brandId], references: [id])
   brandId String @map("brand_id")
@@ -182,7 +185,10 @@ model Attachment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sizes AttachmentSize[]
+  sizes     AttachmentSize[]
+  productId String?          @map("product_id")
+  product   Product?         @relation(name: "images", fields: [productId], references: [id])
+  products  Product[]        @relation("icon")
 
   @@map("attachments")
 }

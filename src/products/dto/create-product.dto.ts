@@ -4,6 +4,7 @@ import {
   IsNumber,
   IsOptional,
   IsString,
+  IsUUID,
   Min,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
@@ -34,7 +35,9 @@ export class CreateProductDto {
   volume: number;
 
   @IsString()
-  icon: string;
+  @IsUUID('4')
+  @IsOptional()
+  iconId?: string;
 
   @IsString()
   @IsNotEmpty()

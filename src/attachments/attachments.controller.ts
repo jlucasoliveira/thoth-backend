@@ -1,5 +1,6 @@
 import {
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   Param,
@@ -51,8 +52,10 @@ export class AttachmentsController {
   findOne(
     @Param('id', ParseUUIDPipe) id: string,
     @Query('size') size?: SizeKind,
+    @Query('sort', new DefaultValuePipe('-size'), SortPipe)
+    orderBy?: OrderBy<AttachmentSize>,
   ) {
-    return this.attachmentService.findOne(id, size);
+    return this.attachmentService.findOne(id, size, orderBy);
   }
 
   @Post()

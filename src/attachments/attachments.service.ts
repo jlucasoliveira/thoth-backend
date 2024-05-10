@@ -1,4 +1,5 @@
 import sharp from 'sharp';
+import { sync as getImageSize } from 'probe-image-size';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
@@ -48,9 +49,14 @@ export class AttachmentsService {
     return { data, meta };
   }
 
-  async findOne(attachmentId: string, size?: SizeKind) {
+  async findOne(
+    attachmentId: string,
+    size?: SizeKind,
+    orderBy?: PageOptions<AttachmentSize>['orderBy'],
+  ) {
     const attachment = await this.prismaService.attachmentSize.findFirst({
       where: { attachmentId, size },
+      orderBy,
     });
 
     if (!attachment) throw new NotFoundException('Anexo não encontrado');
@@ -76,13 +82,15 @@ export class AttachmentsService {
   }
 
   private async resizeImage(file: Express.Multer.File) {
+    const dimensions = getImageSize(file.buffer);
+    const dimensionKeyword =
+      dimensions.width > dimensions.height ? 'width' : 'height';
+
     return await Promise.all(
       Object.values(SizeKind).map(async (size) => {
+        const sz = SizeResolution[size];
         const image = await sharp(file.buffer)
-          .resize(SizeResolution[size], SizeResolution[size], {
-            fit: 'contain',
-            background: { alpha: 1, r: 0, g: 0, b: 0 },
-          })
+          .resize({ [dimensionKeyword]: sz })
           .toBuffer();
 
         return { image, size };

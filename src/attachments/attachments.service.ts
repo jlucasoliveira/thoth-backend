@@ -144,6 +144,16 @@ export class AttachmentsService {
         }),
       );
 
+      const { filename } = this.minioService.uniqueFilename(
+        attachment,
+        file.filename,
+      );
+
+      await transaction.attachment.update({
+        where: { id: attachment.id },
+        data: { key: filename },
+      });
+
       return await transaction.attachmentSize.createMany({
         data: sizes,
       });
@@ -174,6 +184,11 @@ export class AttachmentsService {
       file.originalname,
       resource,
     );
+
+    await transaction.attachment.update({
+      where: { id: attachment.id },
+      data: { key },
+    });
 
     return await transaction.attachmentSize.createMany({
       data: { key, size: SizeKind.MD, attachmentId: attachment.id },

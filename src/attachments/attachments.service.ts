@@ -8,6 +8,7 @@ import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { Transaction } from '@/types/prisma';
 import { isImage } from '@/utils/isImage';
 import { MinIOService } from './minio.service';
+import { CreateAttachmentDTO } from './dto/create-attachment.dto';
 
 enum SizeResolution {
   XS = 50,
@@ -116,9 +117,10 @@ export class AttachmentsService {
   private async createAttachment(
     transaction: Transaction,
     file: Express.Multer.File,
+    payload: Omit<CreateAttachmentDTO, 'resource'>,
   ) {
     const hash = await this.createHash(file.buffer);
-    return await transaction.attachment.create({ data: { hash } });
+    return await transaction.attachment.create({ data: { hash, ...payload } });
   }
 
   private async uploadImages(
@@ -128,6 +130,10 @@ export class AttachmentsService {
     resource?: string,
   ) {
     const images = await this.resizeImage(file);
+    const { filename, basename } = this.minioService.uniqueFilename(
+      attachment,
+      file.originalname,
+    );
 
     try {
       const sizes = await Promise.all(
@@ -144,11 +150,6 @@ export class AttachmentsService {
         }),
       );
 
-      const { filename } = this.minioService.uniqueFilename(
-        attachment,
-        file.filename,
-      );
-
       await transaction.attachment.update({
         where: { id: attachment.id },
         data: { key: filename },
@@ -159,14 +160,15 @@ export class AttachmentsService {
       });
     } catch (error) {
       await this.minioService.deleteFiles(
-        images.map(
-          ({ size }) =>
-            this.minioService.uniqueFilename(
-              attachment,
-              file.originalname,
-              size,
-            ).basename,
-        ),
+        images.map(({ size }) => {
+          const name = this.minioService.uniqueFilename(
+            attachment,
+            file.originalname,
+            size,
+          ).filename;
+
+          return this.minioService.createFolderName(resource, basename, name);
+        }),
       );
       throw error;
     }
@@ -198,9 +200,9 @@ export class AttachmentsService {
   private async _upload(
     transaction: Transaction,
     file: Express.Multer.File,
-    resource?: string,
+    { resource, ...payload }: CreateAttachmentDTO,
   ) {
-    const attachment = await this.createAttachment(transaction, file);
+    const attachment = await this.createAttachment(transaction, file, payload);
 
     if (isImage(file.originalname)) {
       await this.uploadImages(attachment, transaction, file, resource);
@@ -213,9 +215,9 @@ export class AttachmentsService {
     });
   }
 
-  async upload(file: Express.Multer.File, resource?: string) {
+  async upload(file: Express.Multer.File, payload: CreateAttachmentDTO) {
     return await this.prismaService.$transaction((tx) =>
-      this._upload(tx, file, resource),
+      this._upload(tx, file, payload),
     );
   }
 }

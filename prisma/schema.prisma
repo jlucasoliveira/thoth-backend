@@ -181,6 +181,7 @@ model Location {
 
 model Attachment {
   id        String   @id @default(uuid())
+  key       String?
   hash      String?
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

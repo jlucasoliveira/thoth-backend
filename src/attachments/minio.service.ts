@@ -30,11 +30,12 @@ export class MinIOService {
   }
 
   createFolderName(resource: string, folder: string, filename?: string) {
-    const args = [resource, folder];
+    const resources = resource.split('.');
+    resources.push(folder);
 
-    if (filename && filename.length > 0) args.push(filename);
+    if (filename && filename.length > 0) resources.push(filename);
 
-    return join('assets', ...args);
+    return join('assets', ...resources);
   }
 
   uniqueFilename(

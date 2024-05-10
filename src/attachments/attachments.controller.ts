@@ -1,4 +1,5 @@
 import {
+  Body,
   Controller,
   DefaultValuePipe,
   Delete,
@@ -12,11 +13,12 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { AttachmentsService } from './attachments.service';
+import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
+import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
-import { OrderBy } from '@/shared/pagination/filters';
-import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
+import { CreateAttachmentDTO } from './dto/create-attachment.dto';
+import { AttachmentsService } from './attachments.service';
 
 @Controller('attachments')
 export class AttachmentsController {
@@ -24,7 +26,7 @@ export class AttachmentsController {
 
   @Get()
   findAll(
-    @Query('filters', FilterPipe) where: Filter<Attachment>,
+    @Query('filter', FilterPipe) where: Filter<Attachment>,
     @Query('sort', SortPipe) orderBy: OrderBy<Attachment>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
@@ -35,7 +37,7 @@ export class AttachmentsController {
   @Get(':attachmentId/sizes')
   findAllSizes(
     @Param('attachmentId', ParseUUIDPipe) attachmentId: string,
-    @Query('filters', FilterPipe) where: Filter<AttachmentSize>,
+    @Query('filter', FilterPipe) where: Filter<AttachmentSize>,
     @Query('sort', SortPipe) orderBy: OrderBy<AttachmentSize>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
@@ -62,9 +64,9 @@ export class AttachmentsController {
   @UseInterceptors(FileInterceptor('file'))
   upload(
     @UploadedFile() file: Express.Multer.File,
-    @Query('resource') resource?: string,
+    @Body() data: CreateAttachmentDTO,
   ) {
-    return this.attachmentService.upload(file, resource);
+    return this.attachmentService.upload(file, data);
   }
 
   @Delete(':id')

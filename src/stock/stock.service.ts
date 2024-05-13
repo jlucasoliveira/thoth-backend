@@ -3,12 +3,13 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
+import { StockEntry, StockKind } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { PricesService } from '@/prices/prices.service';
 import { PageOptions } from '@/shared/pagination/filters';
-import { StockEntry } from '@prisma/client';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { BaseEntity } from '@/types/prisma';
+import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 
 @Injectable()
 export class StockService {
@@ -18,7 +19,7 @@ export class StockService {
   ) {}
 
   async create(productId: string, quantity: number) {
-    const stock = await this.findOneByProductId(productId);
+    const stock = await this.findOneByProductId(productId, false);
 
     if (!stock) {
       if (quantity < 0)
@@ -41,29 +42,38 @@ export class StockService {
   ) {
     const { newPrice, ...data } = createStockDto;
 
+    data.amount = (data.kind !== StockKind.ENTRY ? -1 : 1) * data.amount;
+
     const stock = await this.create(productId, data.amount);
-    const price = await this.pricesService.create(productId, {
-      price: newPrice,
-    });
+    const payload: Omit<StockEntry, keyof BaseEntity> = {
+      amount: data.amount,
+      costPrice: data.costPrice ?? 0,
+      entryDate: new Date(data.entryDate),
+      expirationDate: new Date(data.expirationDate),
+      kind: data.kind,
+      stockId: stock.id,
+      userId: user.id,
+      priceId: null,
+    };
+
+    if (newPrice !== undefined && data.kind === StockKind.ENTRY) {
+      const price = await this.pricesService.create(productId, {
+        price: newPrice,
+      });
+      payload.priceId = price.id;
+    }
 
     const entry = await this.prismaService.stockEntry.create({
-      data: {
-        amount: data.amount,
-        costPrice: data.costPrice,
-        entryDate: new Date(data.entryDate),
-        expirationDate: new Date(data.expirationDate),
-        kind: data.kind,
-        stockId: stock.id,
-        userId: user.id,
-        priceId: price.id,
-      },
+      data: payload,
     });
+
+    const operation = data.kind === StockKind.ENTRY ? 'increment' : 'decrement';
 
     if (stock.quantity !== data.amount) {
       await this.prismaService.stock.update({
         where: { id: stock.id },
         data: {
-          quantity: { increment: data.amount },
+          quantity: { [operation]: Math.abs(data.amount) },
         },
       });
     }
@@ -100,12 +110,13 @@ export class StockService {
     return stock;
   }
 
-  async findOneByProductId(productId: string) {
+  async findOneByProductId(productId: string, raiseException = true) {
     const stock = await this.prismaService.stock.findFirst({
       where: { productId },
     });
 
-    if (stock) throw new NotFoundException('Estoque não encontrado');
+    if (!stock && raiseException)
+      throw new NotFoundException('Estoque não encontrado');
 
     return stock;
   }

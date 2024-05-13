@@ -12,12 +12,15 @@ export class CreateStockEntryDto {
   entryDate: string;
 
   @IsNumber()
-  costPrice: number;
+  @Min(0)
+  @IsOptional()
+  costPrice?: number;
 
   @IsDateString()
   expirationDate: string;
 
   @IsNumber()
+  @Min(0)
   amount: number;
 
   @IsEnum(StockKind)
@@ -26,5 +29,5 @@ export class CreateStockEntryDto {
   @IsNumber()
   @Min(0)
   @IsOptional()
-  newPrice: number;
+  newPrice?: number;
 }

@@ -58,31 +58,41 @@ enum Gender {
 }
 
 model Product {
+  id        String    @id @default(uuid())
+  name      String
+  weight    Float?
+  volume    Float?
+  gender    Gender?
+  createdAt DateTime? @default(now()) @map("created_at")
+  updatedAt DateTime? @updatedAt @map("updated_at")
+
+  brand      Brand              @relation(fields: [brandId], references: [id])
+  brandId    String             @map("brand_id")
+  category   Category           @relation(fields: [categoryId], references: [id])
+  categoryId String             @map("category_id")
+  prices     Prices[]
+  variations ProductVariation[]
+
+  @@map("products")
+}
+
+model ProductVariation {
   id           String    @id @default(uuid())
-  name         String
+  variation    String
   externalCode String    @map("external_code")
-  weight       Float
-  barCode      String?   @map("bar_code")
+  barcode      String?   @map("bar_code")
   price        Float
-  volume       Float
-  gender       Gender?
   createdAt    DateTime? @default(now()) @map("created_at")
   updatedAt    DateTime? @updatedAt @map("updated_at")
 
-  iconId String?      @map("icon_id")
-  icon   Attachment?  @relation(name: "icon", fields: [iconId], references: [id])
-  images Attachment[] @relation("images")
+  productId String       @map("product_id")
+  product   Product      @relation(fields: [productId], references: [id])
+  iconId    String?      @map("icon_id")
+  icon      Attachment?  @relation(name: "icon", fields: [iconId], references: [id])
+  images    Attachment[] @relation("images")
+  stock     Stock?
 
-  brand   Brand  @relation(fields: [brandId], references: [id])
-  brandId String @map("brand_id")
-
-  category   Category @relation(fields: [categoryId], references: [id])
-  categoryId String   @map("category_id")
-
-  stock  Stock?
-  prices Prices[]
-
-  @@map("products")
+  @@map("product_variations")
 }
 
 model Category {
@@ -119,8 +129,8 @@ model Stock {
   entries   StockEntry[]
   locations StockLocation[]
 
-  product   Product? @relation(fields: [productId], references: [id])
-  productId String?  @unique @map("product_id")
+  variation   ProductVariation? @relation(fields: [variationId], references: [id])
+  variationId String?           @unique @map("variation_id")
 
   @@map("stocks")
 }
@@ -186,10 +196,10 @@ model Attachment {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  sizes     AttachmentSize[]
-  productId String?          @map("product_id")
-  product   Product?         @relation(name: "images", fields: [productId], references: [id])
-  products  Product[]        @relation("icon")
+  sizes       AttachmentSize[]
+  variationId String?            @map("variation_id")
+  variation   ProductVariation?  @relation(name: "images", fields: [variationId], references: [id])
+  variations  ProductVariation[] @relation("icon")
 
   @@map("attachments")
 }

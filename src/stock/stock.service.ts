@@ -5,7 +5,6 @@ import {
 } from '@nestjs/common';
 import { StockEntry, StockKind } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
-import { PricesService } from '@/prices/prices.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { BaseEntity } from '@/types/prisma';
@@ -13,13 +12,10 @@ import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 
 @Injectable()
 export class StockService {
-  constructor(
-    private readonly prismaService: PrismaService,
-    private readonly pricesService: PricesService,
-  ) {}
+  constructor(private readonly prismaService: PrismaService) {}
 
-  async create(productId: string, quantity: number) {
-    const stock = await this.findOneByProductId(productId, false);
+  async create(variationId: string, quantity: number) {
+    const stock = await this.findOneByProductId(variationId, false);
 
     if (!stock) {
       if (quantity < 0)
@@ -28,7 +24,7 @@ export class StockService {
         );
 
       return this.prismaService.stock.create({
-        data: { quantity, productId },
+        data: { quantity, variationId },
       });
     }
 
@@ -36,15 +32,13 @@ export class StockService {
   }
 
   async createStockEntry(
-    createStockDto: CreateStockEntryDto,
+    data: CreateStockEntryDto,
     user: Express.User,
-    productId: string,
+    variationId: string,
   ) {
-    const { newPrice, ...data } = createStockDto;
-
     data.amount = (data.kind !== StockKind.ENTRY ? -1 : 1) * data.amount;
 
-    const stock = await this.create(productId, data.amount);
+    const stock = await this.create(variationId, data.amount);
     const payload: Omit<StockEntry, keyof BaseEntity> = {
       amount: data.amount,
       costPrice: data.costPrice ?? 0,
@@ -53,15 +47,7 @@ export class StockService {
       kind: data.kind,
       stockId: stock.id,
       userId: user.id,
-      priceId: null,
     };
-
-    if (newPrice !== undefined && data.kind === StockKind.ENTRY) {
-      const price = await this.pricesService.create(productId, {
-        price: newPrice,
-      });
-      payload.priceId = price.id;
-    }
 
     const entry = await this.prismaService.stockEntry.create({
       data: payload,
@@ -97,8 +83,8 @@ export class StockService {
     return this.findEntries(props);
   }
 
-  async findByProductId(productId: string, props: PageOptions<StockEntry>) {
-    const stock = await this.findOneByProductId(productId);
+  async findByProductId(variationId: string, props: PageOptions<StockEntry>) {
+    const stock = await this.findOneByProductId(variationId);
     return this.findAllEntries(stock.id, props);
   }
 
@@ -110,9 +96,9 @@ export class StockService {
     return stock;
   }
 
-  async findOneByProductId(productId: string, raiseException = true) {
+  async findOneByProductId(variationId: string, raiseException = true) {
     const stock = await this.prismaService.stock.findFirst({
-      where: { productId },
+      where: { variationId },
     });
 
     if (!stock && raiseException)

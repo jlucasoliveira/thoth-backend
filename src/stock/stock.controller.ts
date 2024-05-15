@@ -16,36 +16,40 @@ import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { StockEntry } from '@prisma/client';
 
-@Controller('products/:productId/stock')
+@Controller(['stock', 'products/:variationId/stock'])
 export class StockController {
   constructor(private readonly stockService: StockService) {}
 
   @Post()
   create(
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('variationId', ParseUUIDPipe) variationId: string,
     @Body('quantity', ParseIntPipe) quantity: number,
   ) {
-    return this.stockService.create(productId, quantity);
+    return this.stockService.create(variationId, quantity);
   }
 
   @Post('entry')
   createEntry(
     @User() user: Express.User,
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('variationId', ParseUUIDPipe) variationId: string,
     @Body() createStockDto: CreateStockEntryDto,
   ) {
-    return this.stockService.createStockEntry(createStockDto, user, productId);
+    return this.stockService.createStockEntry(
+      createStockDto,
+      user,
+      variationId,
+    );
   }
 
   @Get('entries')
   findAllByProductId(
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('variationId', ParseUUIDPipe) variationId: string,
     @Query('filter', FilterPipe) where: Filter<StockEntry>,
     @Query('sort', SortPipe) orderBy: OrderBy<StockEntry>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.stockService.findByProductId(productId, {
+    return this.stockService.findByProductId(variationId, {
       where,
       orderBy,
       skip,
@@ -65,8 +69,8 @@ export class StockController {
   }
 
   @Get()
-  findOneByProductId(@Param('productId', ParseUUIDPipe) productId: string) {
-    return this.stockService.findOneByProductId(productId);
+  findOneByProductId(@Param('variationId', ParseUUIDPipe) variationId: string) {
+    return this.stockService.findOneByProductId(variationId);
   }
 
   @Get(':id')

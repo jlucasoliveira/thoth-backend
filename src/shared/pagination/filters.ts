@@ -81,6 +81,12 @@ export function parseFilterIntoQueryWhere<EntityType>(
           parseFilterIntoQueryWhere({ [key]: orFilter }),
         );
         break;
+      case 'gte':
+        where[key] = { gte: convert(filterValue['gte']) };
+        break;
+      case 'lte':
+        where[key] = { lte: convert(filterValue['lte']) };
+        break;
       default:
         where[key] = parseFilterIntoQueryWhere(filterValue);
         break;

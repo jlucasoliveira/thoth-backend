@@ -6,30 +6,18 @@ type MinusKey<Type> = {
   [Property in keyof Type as `-${string & Property}`]: Type[Property];
 };
 
-type FilterOperator<AttributeType> = AttributeType extends BaseEntity
+export type FilterOperator<AttributeType> = AttributeType extends BaseEntity
   ? Filter<AttributeType>
   :
-      | {
-          eq: AttributeType;
-        }
-      | {
-          ne: AttributeType;
-        }
-      | {
-          like: AttributeType;
-        }
-      | {
-          ilike: AttributeType;
-        }
-      | {
-          between: [AttributeType, AttributeType];
-        }
-      | {
-          or: Filter<AttributeType>[];
-        }
-      | {
-          in: AttributeType[];
-        };
+      | { eq: AttributeType }
+      | { ne: AttributeType }
+      | { like: AttributeType }
+      | { ilike: AttributeType }
+      | { between: [AttributeType, AttributeType] }
+      | { or: Filter<AttributeType>[] }
+      | { in: AttributeType[] }
+      | { gte: AttributeType }
+      | { lte: AttributeType };
 
 export type Filter<Entity> = {
   [key in keyof Entity]?: FilterOperator<Entity[key]>;

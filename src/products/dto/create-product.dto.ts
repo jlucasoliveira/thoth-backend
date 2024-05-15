@@ -2,42 +2,21 @@ import {
   IsEnum,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
+  IsObject,
   IsString,
-  IsUUID,
   Min,
 } from 'class-validator';
 import { Gender } from '@prisma/client';
+import { CreateProductVariationDTO } from './create-product-variation.dto';
 
 export class CreateProductDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  externalCode: string;
-
   @IsNumber()
   @Min(0)
   weight: number;
-
-  @IsString()
-  @IsOptional()
-  barCode: string;
-
-  @IsNumber()
-  @Min(0)
-  price: number;
-
-  @IsNumber()
-  @Min(0)
-  volume: number;
-
-  @IsString()
-  @IsUUID('4')
-  @IsOptional()
-  iconId?: string;
 
   @IsString()
   @IsNotEmpty()
@@ -47,7 +26,14 @@ export class CreateProductDto {
   @IsNotEmpty()
   categoryId: string;
 
-  @IsEnum(Gender)
+  @IsEnum(Object.values(Gender))
   @IsNotEmpty()
   gender: Gender;
+
+  @IsNumber()
+  @Min(0)
+  volume: number;
+
+  @IsObject({ each: true })
+  variations: CreateProductVariationDTO[];
 }

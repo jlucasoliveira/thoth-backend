@@ -1,18 +1,15 @@
-import {
-  Inject,
-  Injectable,
-  NotFoundException,
-  forwardRef,
-} from '@nestjs/common';
-import { Product } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { ProductVariation } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
-import { PricesService } from '@/prices/prices.service';
 import { PageOptions } from '@/shared/pagination/filters';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { Transaction } from '@/types/prisma';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
+import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
 
 @Injectable()
 export class ProductsService {
@@ -20,27 +17,45 @@ export class ProductsService {
     private readonly prismaService: PrismaService,
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
-    @Inject(forwardRef(() => PricesService))
-    private readonly pricesService: PricesService,
   ) {}
 
   async create(createProductDto: CreateProductDto) {
-    await this.brandsService.findOne(createProductDto.brandId);
-    await this.categoriesService.findOne(createProductDto.categoryId);
+    const { variations, ...data } = createProductDto;
+    await this.brandsService.findOne(data.brandId);
+    await this.categoriesService.findOne(data.categoryId);
 
-    const product = await this.prismaService.product.create({
-      data: createProductDto,
+    return await this.prismaService.$transaction(async (tx) => {
+      const product = await tx.product.create({ data });
+      await this.createVariation(product.id, variations, tx);
+
+      return product;
     });
-
-    this.pricesService.create(product.id, createProductDto, false);
-
-    return product;
   }
 
-  async findAll(props: PageOptions<Product>) {
+  async createVariation(
+    productId: string,
+    payloads: Array<CreateProductVariationDTO>,
+    tx?: Transaction,
+  ) {
+    const service = tx ?? this.prismaService;
+
+    return await service.productVariation.createMany({
+      data: payloads.map((payload) => ({
+        ...payload,
+        productId,
+      })),
+    });
+  }
+
+  async findAll(props: PageOptions<ProductVariation>) {
+    const selector = {
+      ...props,
+      include: { product: true },
+    };
+
     const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.product.findMany(props),
-      this.prismaService.product.count(),
+      this.prismaService.productVariation.findMany(selector),
+      this.prismaService.productVariation.count(),
     ]);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
@@ -56,6 +71,16 @@ export class ProductsService {
     if (!product) throw new NotFoundException('Produto não encontrado');
 
     return product;
+  }
+
+  async findOneVariation(id: string, productId: string) {
+    const variation = await this.prismaService.productVariation.findFirst({
+      where: { id, productId },
+    });
+
+    if (!variation) throw new NotFoundException('Variação não encontrada');
+
+    return variation;
   }
 
   async update(id: string, updateProductDto: UpdateProductDto) {
@@ -81,8 +106,26 @@ export class ProductsService {
     });
   }
 
+  async updateVariation(
+    id: string,
+    productId: string,
+    payload: UpdateProductVariationDTO,
+  ) {
+    await this.findOneVariation(id, productId);
+
+    return this.prismaService.productVariation.update({
+      where: { id },
+      data: payload,
+    });
+  }
+
   async remove(id: string) {
     await this.findOne(id);
     return this.prismaService.product.delete({ where: { id } });
+  }
+
+  async removeVariation(id: string, productId: string) {
+    await this.findOneVariation(id, productId);
+    return await this.prismaService.productVariation.delete({ where: { id } });
   }
 }

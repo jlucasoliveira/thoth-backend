@@ -1,0 +1,37 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/products
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Produto 1",
+    "weight": 100,
+    "brandId": "68252624-8fbf-49a9-b5fb-3a4db9c1e76d",
+    "categoryId": "e1b5305e-572e-48a0-9fd1-a9043ff7932f",
+    "gender": "Female",
+    "variations": [
+      {
+        "variation": "Tradicional",
+        "externalCode": "1235",
+        "price": 100,
+        "volume": 100
+      }
+    ]
+  }
+}
+
+vars:post-response {
+  productId: res.body.id
+}

@@ -1,0 +1,25 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/products/{{variation_id}}/stock
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "quantity": 15
+  }
+}
+
+vars:pre-request {
+  variation_id: 796149d1-02c6-4cf1-9b84-1146392afbdd
+}

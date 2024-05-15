@@ -70,7 +70,6 @@ model Product {
   brandId    String             @map("brand_id")
   category   Category           @relation(fields: [categoryId], references: [id])
   categoryId String             @map("category_id")
-  prices     Prices[]
   variations ProductVariation[]
 
   @@map("products")
@@ -106,20 +105,6 @@ model Category {
   @@map("categories")
 }
 
-model Prices {
-  id        String    @id @default(uuid())
-  price     Float
-  createdAt DateTime? @default(now()) @map("created_at")
-  updatedAt DateTime? @updatedAt @map("updated_at")
-
-  product   Product @relation(fields: [productId], references: [id])
-  productId String  @map("product_id")
-
-  entry StockEntry?
-
-  @@map("prices")
-}
-
 model Stock {
   id        String   @id @default(uuid())
   quantity  Float
@@ -150,9 +135,6 @@ model StockEntry {
   kind           StockKind
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
-
-  price   Prices? @relation(fields: [priceId], references: [id])
-  priceId String? @unique @map("price_id")
 
   stock   Stock  @relation(fields: [stockId], references: [id])
   stockId String @map("stock_id")

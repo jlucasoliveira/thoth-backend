@@ -25,9 +25,4 @@ export class CreateStockEntryDto {
 
   @IsEnum(StockKind)
   kind: StockKind;
-
-  @IsNumber()
-  @Min(0)
-  @IsOptional()
-  newPrice?: number;
 }

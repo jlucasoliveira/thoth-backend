@@ -1,0 +1,25 @@
+meta {
+  name: Update
+  type: http
+  seq: 3
+}
+
+patch {
+  url: {{base_url}}/categories/{{category_id}}
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "name": "Hidratante (UPDATED)"
+  }
+}
+
+vars:pre-request {
+  category_id: 523faa88-8568-44b8-84f7-17b4635054ae
+}

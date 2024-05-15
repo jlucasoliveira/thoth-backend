@@ -49,6 +49,9 @@ export function parseFilterIntoQueryWhere<EntityType>(
     const filterValue = filter[key];
     const operator = Object.keys(filterValue)[0];
 
+    if (Array.isArray(filterValue) && !['between', 'or'].includes(operator))
+      return;
+
     switch (operator) {
       case 'eq':
         where[key] = convert(filterValue['eq']);
@@ -58,6 +61,12 @@ export function parseFilterIntoQueryWhere<EntityType>(
         break;
       case 'like':
         where[key] = { contains: convert(filterValue['like']) };
+        break;
+      case 'ilike':
+        where[key] = {
+          contains: convert(filterValue['ilike']),
+          mode: 'insensitive',
+        };
         break;
       case 'between':
         const [start, end] = filterValue['between'];
@@ -71,6 +80,9 @@ export function parseFilterIntoQueryWhere<EntityType>(
         where['OR'] = orFilters.map((orFilter) =>
           parseFilterIntoQueryWhere({ [key]: orFilter }),
         );
+        break;
+      default:
+        where[key] = parseFilterIntoQueryWhere(filterValue);
         break;
     }
   });

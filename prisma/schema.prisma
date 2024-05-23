@@ -85,9 +85,9 @@ model ProductVariation {
   updatedAt    DateTime? @updatedAt @map("updated_at")
 
   productId String       @map("product_id")
-  product   Product      @relation(fields: [productId], references: [id])
+  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
   iconId    String?      @map("icon_id")
-  icon      Attachment?  @relation(name: "icon", fields: [iconId], references: [id])
+  icon      Attachment?  @relation(name: "icon", fields: [iconId], references: [id], onDelete: SetNull)
   images    Attachment[] @relation("images")
   stock     Stock?
 
@@ -114,7 +114,7 @@ model Stock {
   entries   StockEntry[]
   locations StockLocation[]
 
-  variation   ProductVariation? @relation(fields: [variationId], references: [id])
+  variation   ProductVariation? @relation(fields: [variationId], references: [id], onDelete: Cascade)
   variationId String?           @unique @map("variation_id")
 
   @@map("stocks")
@@ -136,7 +136,7 @@ model StockEntry {
   createdAt      DateTime  @default(now()) @map("created_at")
   updatedAt      DateTime  @updatedAt @map("updated_at")
 
-  stock   Stock  @relation(fields: [stockId], references: [id])
+  stock   Stock  @relation(fields: [stockId], references: [id], onDelete: Cascade)
   stockId String @map("stock_id")
 
   user   User   @relation(fields: [userId], references: [id])
@@ -180,7 +180,7 @@ model Attachment {
 
   sizes       AttachmentSize[]
   variationId String?            @map("variation_id")
-  variation   ProductVariation?  @relation(name: "images", fields: [variationId], references: [id])
+  variation   ProductVariation?  @relation(name: "images", fields: [variationId], references: [id], onDelete: Cascade)
   variations  ProductVariation[] @relation("icon")
 
   @@map("attachments")
@@ -201,7 +201,7 @@ model AttachmentSize {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  attachment   Attachment @relation(fields: [attachmentId], references: [id])
+  attachment   Attachment @relation(fields: [attachmentId], references: [id], onDelete: Cascade)
   attachmentId String     @map("attachment_id")
 
   @@map("attachments_sizes")

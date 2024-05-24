@@ -3,6 +3,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsObject,
+  IsOptional,
   IsString,
   Min,
 } from 'class-validator';
@@ -35,5 +36,6 @@ export class CreateProductDto {
   volume: number;
 
   @IsObject({ each: true })
-  variations: CreateProductVariationDTO[];
+  @IsOptional()
+  variations: CreateProductVariationDTO[] = [];
 }

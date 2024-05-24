@@ -1,0 +1,19 @@
+meta {
+  name: List
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/products/{{product_id}}/variations
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  product_id: 22191b9c-6645-42c5-883d-cd9d85737c8e
+}

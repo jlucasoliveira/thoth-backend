@@ -6,7 +6,7 @@ import { PageOptionDto } from './pageOptions.dto';
 @Injectable()
 export class FilterPipe implements PipeTransform {
   async transform(value: any, metadata: ArgumentMetadata) {
-    if (value === undefined) return;
+    if (value === undefined) return {};
 
     const filter = new PageOptionDto();
     filter.where = metadata.data in value ? value[metadata.data] : value;

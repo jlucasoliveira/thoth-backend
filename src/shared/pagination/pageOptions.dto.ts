@@ -20,7 +20,7 @@ export type FilterOperator<AttributeType> = AttributeType extends BaseEntity
       | { lte: AttributeType };
 
 export type Filter<Entity> = {
-  [key in keyof Entity]?: FilterOperator<Entity[key]>;
+  [key in keyof Entity]?: FilterOperator<Entity[key]> | Entity[key];
 };
 
 export type Sort<Entity> = keyof Entity | keyof MinusKey<Entity>;

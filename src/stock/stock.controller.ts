@@ -16,7 +16,7 @@ import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { StockEntry } from '@prisma/client';
 
-@Controller(['stock', 'products/:variationId/stock'])
+@Controller(['stock', 'variations/:variationId/stock'])
 export class StockController {
   constructor(private readonly stockService: StockService) {}
 

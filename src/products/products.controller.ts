@@ -87,7 +87,7 @@ export class ProductsController {
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() payload: UpdateProductVariationDTO,
   ) {
-    return this.variationsService.update(id, productId, payload);
+    return this.variationsService.update(id, payload, productId);
   }
 
   @Patch(':id')

@@ -49,8 +49,8 @@ export class VariationsServices {
 
   async update(
     id: string,
-    productId: string,
     payload: UpdateProductVariationDTO,
+    productId?: string,
   ) {
     await this.findOne(id, productId);
 

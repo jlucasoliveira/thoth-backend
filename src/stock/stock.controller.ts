@@ -7,6 +7,7 @@ import {
   Query,
   ParseUUIDPipe,
   ParseIntPipe,
+  Delete,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
@@ -68,13 +69,18 @@ export class StockController {
     return this.stockService.findAllEntries(id, { where, orderBy, skip, take });
   }
 
+  @Get(':id')
+  findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.stockService.findOne(id);
+  }
+
   @Get()
   findOneByProductId(@Param('variationId', ParseUUIDPipe) variationId: string) {
     return this.stockService.findOneByProductId(variationId);
   }
 
-  @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.stockService.findOne(id);
+  @Delete('entries/:id')
+  delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.stockService.delete(id);
   }
 }

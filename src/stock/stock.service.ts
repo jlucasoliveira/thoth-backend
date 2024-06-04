@@ -106,4 +106,25 @@ export class StockService {
 
     return stock;
   }
+
+  async delete(id: string) {
+    const entry = await this.prismaService.stockEntry.findUnique({
+      where: { id },
+    });
+
+    if (!entry) throw new NotFoundException('Entrada não encontrada');
+
+    const operator = entry.kind === 'ENTRY' ? 'decrement' : 'increment';
+
+    await this.prismaService.$transaction(async (tx) => {
+      await tx.stock.update({
+        data: { quantity: { [operator]: entry.amount } },
+        where: { id: entry.stockId },
+      });
+
+      await tx.stockEntry.delete({ where: { id: entry.id } });
+    });
+
+    return entry;
+  }
 }

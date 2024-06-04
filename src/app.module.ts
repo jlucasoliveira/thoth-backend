@@ -12,6 +12,7 @@ import { StockModule } from './stock/stock.module';
 import { TokensModule } from './tokens/tokens.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { NODE_ENV } from './config/configuration';
+import { ClientsModule } from './clients/clients.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { NODE_ENV } from './config/configuration';
     CategoriesModule,
     TokensModule,
     AttachmentsModule,
+    ClientsModule,
   ],
   providers: [
     {

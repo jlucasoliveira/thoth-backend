@@ -7,12 +7,16 @@ import { StockEntry, StockKind } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { VariationsServices } from '@/products/variations.service';
 import { BaseEntity } from '@/types/prisma';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 
 @Injectable()
 export class StockService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    private readonly prismaService: PrismaService,
+    private readonly variationService: VariationsServices,
+  ) {}
 
   async create(variationId: string, quantity: number) {
     const stock = await this.findOneByProductId(variationId, false);
@@ -61,6 +65,12 @@ export class StockService {
         data: {
           quantity: { [operation]: Math.abs(data.amount) },
         },
+      });
+    }
+
+    if (data.newValue !== undefined) {
+      await this.variationService.update(stock.variationId, {
+        price: data.newValue,
       });
     }
 

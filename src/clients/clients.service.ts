@@ -1,7 +1,6 @@
 import { Client } from '@prisma/client';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '@/prima.service';
-import { exclude } from '@/utils/exclude';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { CreateClientDTO } from './dto/create-client.dto';
@@ -30,17 +29,16 @@ export class ClientsService {
 
   async findAll(params: PageOptions<Client>) {
     const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.client.findMany(params),
+      this.prismaService.client.findMany({
+        ...params,
+        select: { id: true, name: true, createdAt: true, updatedAt: true },
+      }),
       this.prismaService.client.count(params),
     ]);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 
-    const filteredClients = data.map((client) =>
-      exclude(client, ['email', 'phoneNumber']),
-    );
-
-    return { data: filteredClients, meta };
+    return { data, meta };
   }
 
   async update(id: string, data: UpdateClientDTO) {

@@ -84,12 +84,13 @@ model ProductVariation {
   createdAt    DateTime? @default(now()) @map("created_at")
   updatedAt    DateTime? @updatedAt @map("updated_at")
 
-  productId String       @map("product_id")
-  product   Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
-  iconId    String?      @map("icon_id")
-  icon      Attachment?  @relation(name: "icon", fields: [iconId], references: [id], onDelete: SetNull)
-  images    Attachment[] @relation("images")
-  stock     Stock?
+  productId    String       @map("product_id")
+  product      Product      @relation(fields: [productId], references: [id], onDelete: Cascade)
+  iconId       String?      @map("icon_id")
+  icon         Attachment?  @relation(name: "icon", fields: [iconId], references: [id], onDelete: SetNull)
+  images       Attachment[] @relation("images")
+  stock        Stock?
+  orderedItems OrderItem[]
 
   @@map("product_variations")
 }
@@ -215,5 +216,39 @@ model Client {
   createdAt   DateTime @default(now()) @map("created_at")
   updatedAt   DateTime @updatedAt @map("updated_at")
 
+  orders Order[]
+
   @@map("clients")
+}
+
+model Order {
+  id        String    @id @default(uuid())
+  paid      Boolean   @default(false)
+  total     Float
+  totalPaid Float     @default(0) @map("total_paid")
+  paidDate  DateTime? @map("paid_date")
+  createdAt DateTime  @default(now()) @map("created_at")
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  items    OrderItem[]
+  clientId String      @map("client_id")
+  client   Client      @relation(fields: [clientId], references: [id], onDelete: Restrict)
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id        String   @id @default(uuid())
+  quantity  Int
+  total     Float
+  value     Float
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  orderId     String           @map("order_id")
+  order       Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  variationId String           @map("variationId")
+  variation   ProductVariation @relation(fields: [variationId], references: [id], onDelete: Restrict)
+
+  @@map("order_items")
 }

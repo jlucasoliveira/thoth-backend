@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{base_url}}/products/{{variation_id}}/stock
+  url: {{base_url}}/variations/{{variation_id}}/stock
   body: json
   auth: bearer
 }
@@ -21,5 +21,5 @@ body:json {
 }
 
 vars:pre-request {
-  variation_id: 796149d1-02c6-4cf1-9b84-1146392afbdd
+  variation_id: a7a22a1e-2faf-4721-9f75-07a6bb423ce6
 }

@@ -1,0 +1,32 @@
+meta {
+  name: Create
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{base_url}}/orders
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "paid": false,
+    "userId": "0a14ebef-6a94-4ec5-87f3-f25b0dd106d5",
+    "items": [
+      {
+        "quantity": 5,
+        "variationId": "a7a22a1e-2faf-4721-9f75-07a6bb423ce6"
+      },
+      {
+        "quantity": 10,
+        "variationId": "07d3d521-f824-49af-92b6-f44ea861e1f0"
+      }
+    ]
+  }
+}

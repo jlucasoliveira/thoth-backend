@@ -13,6 +13,7 @@ import { TokensModule } from './tokens/tokens.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { NODE_ENV } from './config/configuration';
 import { ClientsModule } from './clients/clients.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -33,6 +34,7 @@ import { ClientsModule } from './clients/clients.module';
     TokensModule,
     AttachmentsModule,
     ClientsModule,
+    OrdersModule,
   ],
   providers: [
     {

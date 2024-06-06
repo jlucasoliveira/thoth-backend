@@ -49,10 +49,11 @@ export class UsersService {
     return { data, meta };
   }
 
-  async findOne(id: string) {
+  async findOne(id: string, raiseException = true) {
     const user = await this.prismaService.user.findFirst({ where: { id } });
 
-    if (!user) throw new NotFoundException('Usuário não encontrado');
+    if (!user && raiseException)
+      throw new NotFoundException('Usuário não encontrado');
 
     return exclude(user, ['password']);
   }

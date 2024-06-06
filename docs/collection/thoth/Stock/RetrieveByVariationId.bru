@@ -1,0 +1,19 @@
+meta {
+  name: RetrieveByVariationId
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{base_url}}/variations/{{variation_id}}/stock
+  body: none
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+vars:pre-request {
+  variation_id: a7a22a1e-2faf-4721-9f75-07a6bb423ce6
+}

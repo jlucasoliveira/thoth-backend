@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { ProductVariation } from '@prisma/client';
+import { Prisma, ProductVariation } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { Transaction } from '@/types/prisma';
 import { PageOptions } from '@/shared/pagination/filters';
@@ -26,9 +26,12 @@ export class VariationsServices {
     });
   }
 
-  async findAll(params: PageOptions<ProductVariation>) {
+  async findAll(
+    params: PageOptions<ProductVariation>,
+    include?: Prisma.ProductVariationInclude,
+  ) {
     const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.productVariation.findMany(params),
+      this.prismaService.productVariation.findMany({ ...params, include }),
       this.prismaService.productVariation.count(params),
     ]);
 

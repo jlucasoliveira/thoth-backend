@@ -75,7 +75,7 @@ export class OrdersService {
   }
 
   private async _create(tx: Transaction, data: CreateOrderDTO) {
-    const client = await this.clientService.findOne(data.userId);
+    const client = await this.clientService.findOneOrDefault(data.userId);
     const order = await tx.order.create({
       data: { total: 0, clientId: client.id },
     });

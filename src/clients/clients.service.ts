@@ -27,6 +27,17 @@ export class ClientsService {
     return client;
   }
 
+  async findOneOrDefault(id?: string) {
+    if (id) return await this.findOne(id);
+
+    const defaultName = 'Comprador Avulso';
+    const defaultClient = await this.prismaService.client.findFirst({
+      where: { name: defaultName },
+    });
+
+    return defaultClient;
+  }
+
   async findAll(params: PageOptions<Client>) {
     const [data, total] = await this.prismaService.$transaction([
       this.prismaService.client.findMany({

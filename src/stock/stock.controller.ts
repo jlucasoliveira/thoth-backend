@@ -8,6 +8,7 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
   Delete,
+  Patch,
 } from '@nestjs/common';
 import { StockService } from './stock.service';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
@@ -16,6 +17,7 @@ import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { StockEntry } from '@prisma/client';
+import { UpdateStockDTO } from './dto/update-stock.dto';
 
 @Controller(['stock', 'variations/:variationId/stock'])
 export class StockController {
@@ -27,6 +29,11 @@ export class StockController {
     @Body('quantity', ParseIntPipe) quantity: number,
   ) {
     return this.stockService.create(variationId, quantity);
+  }
+
+  @Patch(':id')
+  update(@Param('id', ParseUUIDPipe) id: string, @Body() data: UpdateStockDTO) {
+    return this.stockService.update(id, data);
   }
 
   @Post('entry')

@@ -10,6 +10,7 @@ import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { VariationsServices } from '@/products/variations.service';
 import { BaseEntity } from '@/types/prisma';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
+import { UpdateStockDTO } from './dto/update-stock.dto';
 
 @Injectable()
 export class StockService {
@@ -33,6 +34,15 @@ export class StockService {
     }
 
     return stock;
+  }
+
+  async update(id: string, data: UpdateStockDTO) {
+    await this.findOne(id);
+
+    return await this.prismaService.stock.update({
+      where: { id },
+      data,
+    });
   }
 
   async createStockEntry(

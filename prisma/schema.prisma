@@ -107,10 +107,11 @@ model Category {
 }
 
 model Stock {
-  id        String   @id @default(uuid())
-  quantity  Float
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  id          String   @id @default(uuid())
+  quantity    Float
+  minQuantity Float    @default(0) @map("min_quantity")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   entries   StockEntry[]
   locations StockLocation[]

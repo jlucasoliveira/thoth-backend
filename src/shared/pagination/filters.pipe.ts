@@ -28,3 +28,23 @@ export class SortPipe implements PipeTransform {
     return parseSortQueryParam(value);
   }
 }
+
+@Injectable()
+export class IncludePipe implements PipeTransform {
+  convertIntoBoolean(obj: any): Record<string, boolean | object> {
+    const values = Object.entries(obj).map(([key, value]) => {
+      if (typeof value === 'string')
+        if (['true', 'false'].includes(value)) return [key, value === 'true'];
+        else return [key, value];
+
+      return [key, this.convertIntoBoolean(value)];
+    });
+
+    return Object.fromEntries(values);
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async transform(value: any, _metadata: ArgumentMetadata) {
+    return this.convertIntoBoolean(value);
+  }
+}

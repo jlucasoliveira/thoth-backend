@@ -1,4 +1,11 @@
 {
-  "cSpell.words": ["blurhash", "cyus", "ilike", "originalname", "thumbhash"],
+  "cSpell.words": [
+    "blurhash",
+    "cyus",
+    "ilike",
+    "originalname",
+    "thumbhash",
+    "typeorm"
+  ],
   "editor.formatOnSave": true
 }

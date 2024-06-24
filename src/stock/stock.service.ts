@@ -8,7 +8,7 @@ import { PrismaService } from '@/prima.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { VariationsServices } from '@/products/variations.service';
-import { BaseEntity } from '@/types/prisma';
+import { BaseEntity } from '@/@types/prisma';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 import { UpdateStockDTO } from './dto/update-stock.dto';
 

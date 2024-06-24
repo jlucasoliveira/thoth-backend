@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma, ProductVariation } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
-import { Transaction } from '@/types/prisma';
+import { Transaction } from '@/@types/prisma';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';

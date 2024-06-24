@@ -5,7 +5,7 @@ import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
 import { PrismaService } from '@/prima.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
-import { Transaction } from '@/types/prisma';
+import { Transaction } from '@/@types/prisma';
 import { isImage } from '@/utils/isImage';
 import { MinIOService } from './minio.service';
 import { CreateAttachmentDTO } from './dto/create-attachment.dto';

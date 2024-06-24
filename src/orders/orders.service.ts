@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Order } from '@prisma/client';
-import { Transaction } from '@/types/prisma';
+import { Transaction } from '@/@types/prisma';
 import { PrismaService } from '@/prima.service';
 import { ClientsService } from '@/clients/clients.service';
 import { PageOptions } from '@/shared/pagination/filters';

@@ -17,3 +17,10 @@ export function convertIntoBoolean(resource: string): ValueTransformer {
     from: (value) => value === OracleBoolean.true,
   };
 }
+
+export function padIntoLength(length = 2): ValueTransformer {
+  return {
+    from: (value: string) => value.trim(),
+    to: (value: string) => value.padEnd(length, ' '),
+  };
+}

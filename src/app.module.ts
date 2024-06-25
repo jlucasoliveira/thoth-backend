@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RavenInterceptor, RavenModule } from 'nest-raven';
 import { LoggerModule } from 'nestjs-pino';
@@ -11,9 +12,10 @@ import { CategoriesModule } from './categories/categories.module';
 import { StockModule } from './stock/stock.module';
 import { TokensModule } from './tokens/tokens.module';
 import { AttachmentsModule } from './attachments/attachments.module';
-import { NODE_ENV } from './config/configuration';
 import { ClientsModule } from './clients/clients.module';
 import { OrdersModule } from './orders/orders.module';
+import { NODE_ENV } from './config/configuration';
+import { oracleConnectionConfig } from './config/data-source';
 
 @Module({
   imports: [
@@ -24,6 +26,9 @@ import { OrdersModule } from './orders/orders.module';
         transport:
           NODE_ENV === 'production' ? undefined : { target: 'pino-pretty' },
       },
+    }),
+    TypeOrmModule.forRootAsync({
+      useFactory: oracleConnectionConfig,
     }),
     UsersModule,
     AuthModule,

@@ -7,7 +7,7 @@
       {
         "include": "../oracle-certificates",
         "outDir": "dist/oracle-certificates",
-        "watchAssets": false
+        "watchAssets": true
       }
     ],
     "deleteOutDir": true

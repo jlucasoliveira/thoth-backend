@@ -1,3 +1,5 @@
+import { join } from 'node:path';
+
 function asInt(value?: string, defaultValue?: number): number {
   if (value === undefined && defaultValue === undefined)
     throw new Error(`You must provide a valid value or a valid default value`);
@@ -38,4 +40,19 @@ export const MINIO_CONFIG = {
     host: `${new URL(PUBLIC_URL).hostname}:${endpointPort}`,
     expires: asInt(process.env.MINIO_SIGNED_EXPIRES_IN, 5 * 60 * 1000),
   },
+};
+
+export const ORACLE_CONFIG = {
+  type: 'oracle',
+  isDebug: process.env.ORACLE_LOG_QUERY === 'true',
+  host: process.env.ORACLE_HOST,
+  port: asInt(process.env.ORACLE_PORT, 1521),
+  database: process.env.ORACLE_DATABASE,
+  username: process.env.ORACLE_USER,
+  password: process.env.ORACLE_PASSWORD,
+  connectString: process.env.ORACLE_CONNECT_STRING,
+  walletPassword: process.env.ORACLE_WALLET_PASSWORD,
+  walletPath: join(__dirname, '..', '..', 'oracle-certificates'),
+  entitiesPath: join(__dirname, '..', '**', '*.entity.{ts,js}'),
+  migrationsPath: join(__dirname, '..', '..', 'migrations', '*.{ts,js}'),
 };

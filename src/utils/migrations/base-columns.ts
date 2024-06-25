@@ -11,10 +11,12 @@ export const baseColumns: TableColumn[] = [
   new TableColumn({
     name: 'created_at',
     type: 'TIMESTAMP',
+    default: 'CURRENT_TIMESTAMP',
   }),
   new TableColumn({
     name: 'updated_at',
     type: 'TIMESTAMP',
+    default: 'CURRENT_TIMESTAMP',
   }),
   new TableColumn({
     name: 'deleted_at',

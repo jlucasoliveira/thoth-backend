@@ -10,12 +10,12 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { OrdersService } from './orders.service';
-import { CreateOrderDTO } from './dto/create-order.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { OrderBy } from '@/shared/pagination/filters';
-import { Order } from '@prisma/client';
+import { OrderEntity } from './orders.entity';
+import { OrdersService } from './orders.service';
+import { CreateOrderDTO } from './dto/create-order.dto';
 import { UpdateOrderDTO } from './dto/update-order.dto';
 
 @Controller('orders')
@@ -29,12 +29,12 @@ export class OrdersController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<Order>,
-    @Query('sort', SortPipe) orderBy: OrderBy<Order>,
+    @Query('filter', FilterPipe) where: Filter<OrderEntity>,
+    @Query('sort', SortPipe) order: OrderBy<OrderEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.ordersService.findAll({ orderBy, skip, take, where });
+    return this.ordersService.findAll({ order, skip, take, where });
   }
 
   @Get(':id')

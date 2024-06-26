@@ -3,26 +3,32 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Order } from '@prisma/client';
-import { Transaction } from '@/@types/prisma';
-import { PrismaService } from '@/prima.service';
+import { EntityManager, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { ClientsService } from '@/clients/clients.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
-import { Item, ResolvedOrder } from './types';
+import { StockEntity } from '@/stock/stock.entity';
+import { ProductVariationEntity } from '@/products/variations.entity';
+import { OrderEntity } from './orders.entity';
+import { OrderItemEntity } from './order-items.entity';
+import { CreateOrderItemDTO } from './dto/create-order-item.dto';
 import { UpdateOrderDTO } from './dto/update-order.dto';
 import { CreateOrderDTO } from './dto/create-order.dto';
-import { CreateOrderItemDTO } from './dto/create-order-item.dto';
+import { Item, ResolvedOrder } from './types';
 
 @Injectable()
 export class OrdersService {
   constructor(
-    private readonly prismaService: PrismaService,
+    @InjectRepository(OrderEntity)
+    private readonly orderRepository: Repository<OrderEntity>,
+    @InjectRepository(ProductVariationEntity)
+    private readonly variationRepository: Repository<ProductVariationEntity>,
     private readonly clientService: ClientsService,
   ) {}
 
   private async ensureInventory(
-    tx: Transaction,
+    tx: EntityManager,
     orderId: string,
     orderItems: CreateOrderItemDTO[],
   ): Promise<ResolvedOrder> {
@@ -30,13 +36,13 @@ export class OrdersService {
 
     const promises = orderItems.map<Promise<Item>>(
       async ({ variationId, quantity }) => {
-        const variation = await this.prismaService.productVariation.findUnique({
+        const variation = await this.variationRepository.findOne({
           where: { id: variationId },
           select: {
             price: true,
             variation: true,
-            product: { select: { name: true } },
-            stock: { select: { quantity: true } },
+            product: { name: true },
+            stock: { quantity: true },
           },
         });
 
@@ -52,10 +58,12 @@ export class OrdersService {
             message: `${variation.product.name} - ${variation.variation} sem estoque.`,
           });
 
-        await tx.stock.update({
-          where: { variationId },
-          data: { quantity: { decrement: quantity } },
-        });
+        await tx
+          .getRepository(StockEntity)
+          .update(
+            { variationId },
+            { quantity: () => `quantity - ${quantity}` },
+          );
 
         total += variation.price * quantity;
 
@@ -74,42 +82,39 @@ export class OrdersService {
     return { total, items };
   }
 
-  private async _create(tx: Transaction, data: CreateOrderDTO) {
+  private async _create(tx: EntityManager, data: CreateOrderDTO) {
     const client = await this.clientService.findOneOrDefault(data.userId);
-    const order = await tx.order.create({
-      data: { total: 0, clientId: client.id },
-    });
+    const orderRepository = tx.getRepository(OrderEntity);
+    const order = await orderRepository.save(
+      orderRepository.create({ total: 0, clientId: client.id }),
+    );
+
     const { total, items } = await this.ensureInventory(
       tx,
       order.id,
       data.items,
     );
 
-    await tx.orderItem.createMany({ data: items });
+    const orderItemRepository = tx.getRepository(OrderItemEntity);
+    await orderItemRepository.save(orderItemRepository.create(items));
 
-    return await tx.order.update({
-      where: { id: order.id },
-      data: {
-        total,
-        paid: data.paid,
-        clientId: client.id,
-        totalPaid: data.totalPaid,
-        paidDate: data.totalPaid === total ? new Date() : undefined,
-      },
+    return await orderRepository.update(order.id, {
+      total,
+      paid: data.paid,
+      clientId: client.id,
+      totalPaid: data.totalPaid,
+      paidDate: data.totalPaid === total ? new Date() : undefined,
     });
   }
 
   async create(data: CreateOrderDTO) {
-    return await this.prismaService.$transaction((tx) =>
-      this._create(tx, data),
+    return await this.orderRepository.manager.transaction(
+      async (tx) => await this._create(tx, data),
     );
   }
 
-  async findAll(params: PageOptions<Order>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.order.findMany(params),
-      this.prismaService.order.count(params),
-    ]);
+  async findAll(params: PageOptions<OrderEntity>) {
+    const [data, total] = await this.orderRepository.findAndCount(params);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 
@@ -117,7 +122,7 @@ export class OrdersService {
   }
 
   async findOne(id: string, raiseException = true) {
-    const order = await this.prismaService.order.findFirst({ where: { id } });
+    const order = await this.orderRepository.findOne({ where: { id } });
 
     if (!order && raiseException)
       throw new NotFoundException('Pedido não encontrado');
@@ -128,18 +133,15 @@ export class OrdersService {
   async update(id: string, data: UpdateOrderDTO) {
     await this.findOne(id);
 
-    const order = await this.prismaService.order.update({
-      where: { id },
-      data,
-    });
+    await this.orderRepository.update(id, data);
 
-    return order;
+    return await this.findOne(id);
   }
 
   async delete(id: string) {
     const order = await this.findOne(id);
 
-    await this.prismaService.order.delete({ where: { id } });
+    await this.orderRepository.delete(id);
 
     return order;
   }

@@ -1,11 +1,24 @@
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { StockModule } from '@/stock/stock.module';
+import { ClientsModule } from '@/clients/clients.module';
+import { ProductVariationEntity } from '@/products/variations.entity';
+import { OrderItemEntity } from './order-items.entity';
+import { OrderEntity } from './orders.entity';
 import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
-import { PrismaService } from '@/prima.service';
-import { ClientsService } from '@/clients/clients.service';
 
 @Module({
-  providers: [OrdersService, ClientsService, PrismaService],
+  imports: [
+    TypeOrmModule.forFeature([
+      OrderEntity,
+      OrderItemEntity,
+      ProductVariationEntity,
+    ]),
+    ClientsModule,
+    StockModule,
+  ],
+  providers: [OrdersService],
   controllers: [OrdersController],
   exports: [OrdersService],
 })

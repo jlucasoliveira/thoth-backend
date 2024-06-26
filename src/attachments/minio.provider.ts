@@ -9,8 +9,6 @@ export const minioFactory: Provider = {
   useFactory: () =>
     new Client({
       endPoint: MINIO_CONFIG.endpointUrl,
-      port: MINIO_CONFIG.endpointPort,
-      useSSL: MINIO_CONFIG.useSSL,
       accessKey: MINIO_CONFIG.accessKey,
       secretKey: MINIO_CONFIG.secretKey,
     }),

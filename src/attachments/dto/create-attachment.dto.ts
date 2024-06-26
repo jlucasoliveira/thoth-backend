@@ -3,7 +3,7 @@ import { IsOptional, IsString, IsUUID } from 'class-validator';
 export class CreateAttachmentDTO {
   @IsUUID()
   @IsOptional()
-  productId?: string;
+  variationId?: string;
 
   @IsString()
   @IsOptional()

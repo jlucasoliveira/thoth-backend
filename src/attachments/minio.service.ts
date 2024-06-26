@@ -2,8 +2,8 @@ import { Client } from 'minio';
 import { extname, join } from 'node:path';
 import { Inject, Injectable } from '@nestjs/common';
 import { MINIO_CONFIG } from '@/config/configuration';
+import { AttachmentEntity } from './attachments.entity';
 import { MINIO_PROVIDER } from './minio.provider';
-import { Attachment } from '@prisma/client';
 
 type UniqueFileName = {
   filename: string;
@@ -39,14 +39,13 @@ export class MinIOService {
   }
 
   uniqueFilename(
-    attachment: Attachment,
+    attachment: AttachmentEntity,
     filename: string,
     sfx?: string,
   ): UniqueFileName {
     const ext = extname(filename);
 
-    const file = filename.replace(ext, '');
-    const basename = file + attachment.id;
+    const basename = attachment.id;
 
     return {
       basename,
@@ -55,7 +54,7 @@ export class MinIOService {
   }
 
   async putFile(
-    attachment: Attachment,
+    attachment: AttachmentEntity,
     file: Buffer,
     filename: string,
     resource = 'content',

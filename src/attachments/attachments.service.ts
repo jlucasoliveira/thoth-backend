@@ -1,12 +1,14 @@
 import sharp from 'sharp';
+import { InjectRepository } from '@nestjs/typeorm';
+import { EntityManager, Repository } from 'typeorm';
 import { sync as getImageSize } from 'probe-image-size';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
-import { PrismaService } from '@/prima.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
-import { Transaction } from '@/@types/prisma';
 import { isImage } from '@/utils/isImage';
+import { SizeKind } from '@/types/size-kind';
+import { AttachmentSizeEntity } from './attachment-sizes.entity';
+import { AttachmentEntity } from './attachments.entity';
 import { MinIOService } from './minio.service';
 import { CreateAttachmentDTO } from './dto/create-attachment.dto';
 
@@ -21,29 +23,29 @@ enum SizeResolution {
 @Injectable()
 export class AttachmentsService {
   constructor(
+    @InjectRepository(AttachmentEntity)
+    private readonly attachmentRepository: Repository<AttachmentEntity>,
+    @InjectRepository(AttachmentSizeEntity)
+    private readonly attachmentSizeRepository: Repository<AttachmentSizeEntity>,
     private readonly minioService: MinIOService,
-    private readonly prismaService: PrismaService,
   ) {}
 
-  async findAll(props: PageOptions<Attachment>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.attachment.findMany(props),
-      this.prismaService.attachment.count(),
-    ]);
+  async findAll(props: PageOptions<AttachmentEntity>) {
+    const [data, total] = await this.attachmentRepository.findAndCount(props);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
     return { data, meta };
   }
 
-  async findAllSizes(attachmentId: string, props: PageOptions<AttachmentSize>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.attachmentSize.findMany({
-        ...props,
-        where: { ...props.where, attachmentId },
-      }),
-      this.prismaService.attachmentSize.count(),
-    ]);
+  async findAllSizes(
+    attachmentId: string,
+    props: PageOptions<AttachmentSizeEntity>,
+  ) {
+    const [data, total] = await this.attachmentSizeRepository.findAndCount({
+      ...props,
+      where: { ...props.where, attachmentId },
+    });
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
@@ -53,11 +55,11 @@ export class AttachmentsService {
   async findOne(
     attachmentId: string,
     size?: SizeKind,
-    orderBy?: PageOptions<AttachmentSize>['orderBy'],
+    order?: PageOptions<AttachmentSizeEntity>['order'],
   ) {
-    const attachment = await this.prismaService.attachmentSize.findFirst({
+    const attachment = await this.attachmentSizeRepository.findOne({
       where: { attachmentId, size },
-      orderBy,
+      order,
     });
 
     if (!attachment) throw new NotFoundException('Anexo não encontrado');
@@ -68,18 +70,18 @@ export class AttachmentsService {
   }
 
   async delete(id: string) {
-    const sizes = await this.prismaService.attachmentSize.findMany({
+    const sizes = await this.attachmentSizeRepository.find({
       where: { attachmentId: id },
       select: { key: true },
     });
 
-    await this.minioService.deleteFiles(sizes.map((size) => size.key));
+    await this.attachmentRepository.manager.transaction(async (tx) => {
+      await this.minioService.deleteFiles(sizes.map((size) => size.key));
 
-    await this.prismaService.attachmentSize.deleteMany({
-      where: { attachmentId: id },
+      await tx.getRepository(AttachmentSizeEntity).delete({ attachmentId: id });
+
+      await tx.getRepository(AttachmentEntity).delete(id);
     });
-
-    await this.prismaService.attachment.delete({ where: { id } });
   }
 
   private async resizeImage(file: Express.Multer.File) {
@@ -115,19 +117,23 @@ export class AttachmentsService {
   }
 
   private async createAttachment(
-    transaction: Transaction,
+    transaction: EntityManager,
     file: Express.Multer.File,
     payload: Omit<CreateAttachmentDTO, 'resource'>,
   ) {
     const hash = await this.createHash(file.buffer);
-    return await transaction.attachment.create({ data: { hash, ...payload } });
+    const attachmentRepository = transaction.getRepository(AttachmentEntity);
+
+    return await attachmentRepository.save(
+      attachmentRepository.create({ hash, ...payload }),
+    );
   }
 
   private async uploadImages(
-    attachment: Attachment,
-    transaction: Transaction,
+    attachment: AttachmentEntity,
+    tx: EntityManager,
     file: Express.Multer.File,
-    resource?: string,
+    resource = 'content',
   ) {
     const images = await this.resizeImage(file);
     const { filename, basename } = this.minioService.uniqueFilename(
@@ -150,14 +156,15 @@ export class AttachmentsService {
         }),
       );
 
-      await transaction.attachment.update({
-        where: { id: attachment.id },
-        data: { key: filename },
-      });
+      await tx
+        .getRepository(AttachmentEntity)
+        .update(attachment.id, { key: filename });
 
-      return await transaction.attachmentSize.createMany({
-        data: sizes,
-      });
+      const attachmentSizeRepository = tx.getRepository(AttachmentSizeEntity);
+
+      return await attachmentSizeRepository.save(
+        attachmentSizeRepository.create(sizes),
+      );
     } catch (error) {
       await this.minioService.deleteFiles(
         images.map(({ size }) => {
@@ -175,8 +182,8 @@ export class AttachmentsService {
   }
 
   private async uploadFile(
-    attachment: Attachment,
-    transaction: Transaction,
+    attachment: AttachmentEntity,
+    tx: EntityManager,
     file: Express.Multer.File,
     resource?: string,
   ) {
@@ -187,36 +194,39 @@ export class AttachmentsService {
       resource,
     );
 
-    await transaction.attachment.update({
-      where: { id: attachment.id },
-      data: { key },
-    });
+    await tx.getRepository(AttachmentEntity).update(attachment.id, { key });
 
-    return await transaction.attachmentSize.createMany({
-      data: { key, size: SizeKind.MD, attachmentId: attachment.id },
-    });
+    const attachmentSizeRepository = tx.getRepository(AttachmentSizeEntity);
+
+    return await attachmentSizeRepository.save(
+      attachmentSizeRepository.create({
+        key,
+        size: SizeKind.MD,
+        attachmentId: attachment.id,
+      }),
+    );
   }
 
   private async _upload(
-    transaction: Transaction,
+    tx: EntityManager,
     file: Express.Multer.File,
     { resource, ...payload }: CreateAttachmentDTO,
   ) {
-    const attachment = await this.createAttachment(transaction, file, payload);
+    const attachment = await this.createAttachment(tx, file, payload);
 
     if (isImage(file.originalname)) {
-      await this.uploadImages(attachment, transaction, file, resource);
+      await this.uploadImages(attachment, tx, file, resource);
     } else {
-      await this.uploadFile(attachment, transaction, file, resource);
+      await this.uploadFile(attachment, tx, file, resource);
     }
 
-    return await transaction.attachment.findFirst({
+    return await tx.getRepository(AttachmentEntity).findOne({
       where: { id: attachment.id },
     });
   }
 
   async upload(file: Express.Multer.File, payload: CreateAttachmentDTO) {
-    return await this.prismaService.$transaction((tx) =>
+    return await this.attachmentRepository.manager.transaction((tx) =>
       this._upload(tx, file, payload),
     );
   }

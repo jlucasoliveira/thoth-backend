@@ -1,6 +1,6 @@
 import { Client } from 'minio';
-import { MINIO_CONFIG } from '@/config/configuration';
 import { Provider } from '@nestjs/common';
+import { MINIO_CONFIG } from '@/config/configuration';
 
 export const MINIO_PROVIDER = 'MINIO';
 

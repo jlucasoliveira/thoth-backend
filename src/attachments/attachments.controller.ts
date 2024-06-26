@@ -13,12 +13,14 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { Attachment, AttachmentSize, SizeKind } from '@prisma/client';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
-import { CreateAttachmentDTO } from './dto/create-attachment.dto';
+import { SizeKind } from '@/types/size-kind';
+import { AttachmentEntity } from './attachments.entity';
+import { AttachmentSizeEntity } from './attachment-sizes.entity';
 import { AttachmentsService } from './attachments.service';
+import { CreateAttachmentDTO } from './dto/create-attachment.dto';
 
 @Controller('attachments')
 export class AttachmentsController {
@@ -26,24 +28,24 @@ export class AttachmentsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<Attachment>,
-    @Query('sort', SortPipe) orderBy: OrderBy<Attachment>,
+    @Query('filter', FilterPipe) where: Filter<AttachmentEntity>,
+    @Query('sort', SortPipe) order: OrderBy<AttachmentEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.attachmentService.findAll({ orderBy, skip, take, where });
+    return this.attachmentService.findAll({ order, skip, take, where });
   }
 
   @Get(':attachmentId/sizes')
   findAllSizes(
     @Param('attachmentId', ParseUUIDPipe) attachmentId: string,
-    @Query('filter', FilterPipe) where: Filter<AttachmentSize>,
-    @Query('sort', SortPipe) orderBy: OrderBy<AttachmentSize>,
+    @Query('filter', FilterPipe) where: Filter<AttachmentSizeEntity>,
+    @Query('sort', SortPipe) order: OrderBy<AttachmentSizeEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.attachmentService.findAllSizes(attachmentId, {
-      orderBy,
+      order,
       skip,
       take,
       where,
@@ -55,9 +57,9 @@ export class AttachmentsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Query('size') size?: SizeKind,
     @Query('sort', new DefaultValuePipe('-size'), SortPipe)
-    orderBy?: OrderBy<AttachmentSize>,
+    order?: OrderBy<AttachmentSizeEntity>,
   ) {
-    return this.attachmentService.findOne(id, size, orderBy);
+    return this.attachmentService.findOne(id, size, order);
   }
 
   @Post()

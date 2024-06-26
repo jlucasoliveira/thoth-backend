@@ -14,7 +14,11 @@ export function convertIntoBoolean(resource: string): ValueTransformer {
         `Invalid value (${value}, '${typeof value}') on ${resource}`,
       );
     },
-    from: (value) => value === OracleBoolean.true,
+    from: (value) => {
+      if (typeof value === 'boolean') return value;
+      if (typeof value === 'string') return value === OracleBoolean.true;
+      return value;
+    },
   };
 }
 

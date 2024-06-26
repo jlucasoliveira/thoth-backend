@@ -24,7 +24,7 @@ export type OrderBy<Entity> = Record<keyof Entity, 'asc' | 'desc'>;
 export type PageOptions<Entity> = {
   take: number;
   skip: number;
-  orderBy: OrderBy<Entity>;
+  order: OrderBy<Entity>;
   where: WhereClause<Entity>;
 };
 

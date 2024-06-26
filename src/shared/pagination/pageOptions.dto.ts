@@ -1,6 +1,6 @@
 import { Type } from 'class-transformer';
 import { IsNumber, IsOptional, IsString, Min } from 'class-validator';
-import { BaseEntity } from '@/types/prisma';
+import { BaseEntity } from '@/types/typeorm/base-model';
 
 type MinusKey<Type> = {
   [Property in keyof Type as `-${string & Property}`]: Type[Property];

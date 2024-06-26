@@ -9,13 +9,13 @@ import {
   Query,
   ParseIntPipe,
 } from '@nestjs/common';
+import { OrderBy } from '@/shared/pagination/filters';
+import { Filter } from '@/shared/pagination/pageOptions.dto';
+import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import { CategoryEntity } from './categories.entity';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { Category } from '@prisma/client';
-import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
-import { Filter } from '@/shared/pagination/pageOptions.dto';
-import { OrderBy } from '@/shared/pagination/filters';
 
 @Controller('categories')
 export class CategoriesController {
@@ -28,29 +28,29 @@ export class CategoriesController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<Category>,
-    @Query('sort', SortPipe) orderBy: OrderBy<Category>,
+    @Query('filter', FilterPipe) where: Filter<CategoryEntity>,
+    @Query('sort', SortPipe) order: OrderBy<CategoryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.categoriesService.findAll({ where, orderBy, skip, take });
+    return this.categoriesService.findAll({ where, order, skip, take });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.findOne(id);
   }
 
   @Patch(':id')
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
     return this.categoriesService.update(id, updateCategoryDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.categoriesService.remove(id);
   }
 }

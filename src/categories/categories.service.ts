@@ -1,34 +1,35 @@
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { PageOptions } from '@/shared/pagination/filters';
+import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { CategoryEntity } from './categories.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
-import { PrismaService } from '@/prima.service';
-import { PageOptions } from '@/shared/pagination/filters';
-import { Category } from '@prisma/client';
-import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 
 @Injectable()
 export class CategoriesService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(CategoryEntity)
+    private readonly categoryRepository: Repository<CategoryEntity>,
+  ) {}
 
-  create(createCategoryDto: CreateCategoryDto) {
-    return this.prismaService.category.create({
-      data: createCategoryDto,
-    });
+  async create(createCategoryDto: CreateCategoryDto) {
+    return await this.categoryRepository.save(
+      this.categoryRepository.create(createCategoryDto),
+    );
   }
 
-  async findAll(props: PageOptions<Category>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.category.findMany(props),
-      this.prismaService.category.count(),
-    ]);
+  async findAll(props: PageOptions<CategoryEntity>) {
+    const [data, total] = await this.categoryRepository.findAndCount(props);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
     return { data, meta };
   }
 
-  async findOne(id: string) {
-    const category = await this.prismaService.category.findFirst({
+  async findOne(id: number) {
+    const category = await this.categoryRepository.findOne({
       where: { id },
     });
 
@@ -37,18 +38,19 @@ export class CategoriesService {
     return category;
   }
 
-  async update(id: string, updateCategoryDto: UpdateCategoryDto) {
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
     await this.findOne(id);
 
-    return this.prismaService.category.update({
-      where: { id },
-      data: updateCategoryDto,
-    });
+    await this.categoryRepository.update(id, updateCategoryDto);
+
+    return await this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
+  async remove(id: number) {
+    const category = await this.findOne(id);
 
-    return this.prismaService.category.delete({ where: { id } });
+    await this.categoryRepository.delete(id);
+
+    return category;
   }
 }

@@ -1,34 +1,38 @@
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
-import { User } from '@prisma/client';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
-import { PrismaService } from '@/prima.service';
 import { exclude } from '@/utils/exclude';
+import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private readonly userRepository: Repository<UserEntity>,
+  ) {}
 
   async create(payload: CreateUserDto) {
     const { password, ...data } = payload;
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = await this.prismaService.user.create({
-      data: {
+    const user = await this.userRepository.save(
+      this.userRepository.create({
         ...data,
         password: hashedPassword,
-      },
-    });
+      }),
+    );
 
     return exclude(user, ['password']);
   }
 
-  async findAll(props: PageOptions<User>) {
-    const select: Partial<Record<keyof User, boolean>> = {
+  async findAll(props: PageOptions<UserEntity>) {
+    const select: Partial<Record<keyof UserEntity, boolean>> = {
       id: true,
       name: true,
       username: true,
@@ -39,10 +43,10 @@ export class UsersService {
       phoneNumber: true,
     };
 
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.user.findMany({ ...props, select }),
-      this.prismaService.user.count(),
-    ]);
+    const [data, total] = await this.userRepository.findAndCount({
+      ...props,
+      select,
+    });
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
@@ -50,7 +54,7 @@ export class UsersService {
   }
 
   async findOne(id: string, raiseException = true) {
-    const user = await this.prismaService.user.findFirst({ where: { id } });
+    const user = await this.userRepository.findOne({ where: { id } });
 
     if (!user && raiseException)
       throw new NotFoundException('Usuário não encontrado');
@@ -59,33 +63,28 @@ export class UsersService {
   }
 
   async findOneByUsername(username: string, withPassword = false) {
-    const user = await this.prismaService.user.findFirst({
+    const user = await this.userRepository.findOne({
       where: { username },
     });
 
     if (!user) throw new NotFoundException('Usuário não encontrado');
 
-    return withPassword ? user : (exclude(user, ['password']) as User);
+    return withPassword ? user : (exclude(user, ['password']) as UserEntity);
   }
 
   async update(id: string, updateUserDto: UpdateUserDto | { lastLogin: Date }) {
     await this.findOne(id);
 
-    const user = await this.prismaService.user.update({
-      where: { id },
-      data: updateUserDto,
-    });
+    await this.userRepository.update(id, updateUserDto);
 
-    return exclude(user, ['password']);
+    return await this.findOne(id);
   }
 
   async remove(id: string) {
-    await this.findOne(id);
+    const user = await this.findOne(id);
 
-    const user = await this.prismaService.user.delete({
-      where: { id },
-    });
+    await this.userRepository.delete(id);
 
-    return exclude(user, ['password']);
+    return user;
   }
 }

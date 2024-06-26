@@ -10,13 +10,13 @@ import {
   Delete,
   Patch,
 } from '@nestjs/common';
-import { StockService } from './stock.service';
-import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 import { User } from '@/auth/guards/user.decorator';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
-import { StockEntry } from '@prisma/client';
+import { StockEntryEntity } from './stock-entries.entity';
+import { StockService } from './stock.service';
+import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 import { UpdateStockDTO } from './dto/update-stock.dto';
 
 @Controller(['stock', 'variations/:variationId/stock'])
@@ -52,14 +52,14 @@ export class StockController {
   @Get('entries')
   findAllByProductId(
     @Param('variationId', ParseUUIDPipe) variationId: string,
-    @Query('filter', FilterPipe) where: Filter<StockEntry>,
-    @Query('sort', SortPipe) orderBy: OrderBy<StockEntry>,
+    @Query('filter', FilterPipe) where: Filter<StockEntryEntity>,
+    @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     return this.stockService.findByProductId(variationId, {
       where,
-      orderBy,
+      order,
       skip,
       take,
     });
@@ -68,12 +68,12 @@ export class StockController {
   @Get(':id/entries')
   findAll(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('filter', FilterPipe) where: Filter<StockEntry>,
-    @Query('sort', SortPipe) orderBy: OrderBy<StockEntry>,
+    @Query('filter', FilterPipe) where: Filter<StockEntryEntity>,
+    @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.stockService.findAllEntries(id, { where, orderBy, skip, take });
+    return this.stockService.findAllEntries(id, { where, order, skip, take });
   }
 
   @Get(':id')

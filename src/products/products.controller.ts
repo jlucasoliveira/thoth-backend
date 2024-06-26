@@ -10,16 +10,17 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
 } from '@nestjs/common';
-import { Product, ProductVariation } from '@prisma/client';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { ProductsService } from './products.service';
+import { VariationsServices } from './variations.service';
+import { ProductEntity } from './products.entity';
+import { ProductVariationEntity } from './variations.entity';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
-import { VariationsServices } from './variations.service';
 
 @Controller('products')
 export class ProductsController {
@@ -35,7 +36,7 @@ export class ProductsController {
 
   @Post(':productId/variations')
   createVariation(
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('productId', ParseIntPipe) productId: number,
     @Body() payload: CreateProductVariationDTO,
   ) {
     return this.variationsService.create(productId, [payload]);
@@ -43,25 +44,25 @@ export class ProductsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<Product>,
-    @Query('sort', SortPipe) orderBy: OrderBy<Product>,
+    @Query('filter', FilterPipe) where: Filter<ProductEntity>,
+    @Query('sort', SortPipe) order: OrderBy<ProductEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.productsService.findAll({ orderBy, skip, take, where });
+    return this.productsService.findAll({ order, skip, take, where });
   }
 
   @Get(':productId/variations')
   findAllVariations(
-    @Param('productId', ParseUUIDPipe) productId: string,
-    @Query('filter', FilterPipe) where: Filter<ProductVariation>,
-    @Query('sort', SortPipe) orderBy: OrderBy<ProductVariation>,
+    @Param('productId', ParseIntPipe) productId: number,
+    @Query('filter', FilterPipe) where: Filter<ProductVariationEntity>,
+    @Query('sort', SortPipe) order: OrderBy<ProductVariationEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
     where.productId = productId;
     return this.variationsService.findAll({
-      orderBy,
+      order,
       skip,
       take,
       where,
@@ -71,40 +72,43 @@ export class ProductsController {
   @Get(':productId/variations/:id')
   findOneVariation(
     @Param('id', ParseUUIDPipe) id: string,
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('productId', ParseIntPipe) productId: number,
   ) {
     return this.variationsService.findOne(id, productId);
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.findOne(id);
   }
 
   @Patch(':productId/variations/:id')
   updateVariation(
     @Param('id', ParseUUIDPipe) id: string,
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('productId', ParseIntPipe) productId: number,
     @Body() payload: UpdateProductVariationDTO,
   ) {
     return this.variationsService.update(id, payload, productId);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateProductDto: UpdateProductDto,
+  ) {
     return this.productsService.update(id, updateProductDto);
   }
 
   @Delete(':productId/variations/:id')
   deleteVariation(
     @Param('id', ParseUUIDPipe) id: string,
-    @Param('productId', ParseUUIDPipe) productId: string,
+    @Param('productId', ParseIntPipe) productId: number,
   ) {
     return this.deleteVariation(id, productId);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
+  remove(@Param('id', ParseIntPipe) id: number) {
     return this.productsService.remove(id);
   }
 }

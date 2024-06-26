@@ -1,18 +1,20 @@
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Product } from '@prisma/client';
-import { PrismaService } from '@/prima.service';
 import { BrandsService } from '@/brands/brands.service';
 import { CategoriesService } from '@/categories/categories.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { ProductEntity } from './products.entity';
+import { VariationsServices } from './variations.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { VariationsServices } from './variations.service';
 
 @Injectable()
 export class ProductsService {
   constructor(
-    private readonly prismaService: PrismaService,
+    @InjectRepository(ProductEntity)
+    private readonly productRepository: Repository<ProductEntity>,
     private readonly brandsService: BrandsService,
     private readonly categoriesService: CategoriesService,
     private readonly variationsService: VariationsServices,
@@ -23,8 +25,10 @@ export class ProductsService {
     await this.brandsService.findOne(data.brandId);
     await this.categoriesService.findOne(data.categoryId);
 
-    return await this.prismaService.$transaction(async (tx) => {
-      const product = await tx.product.create({ data });
+    return await this.productRepository.manager.transaction(async (tx) => {
+      const repository = tx.getRepository(ProductEntity);
+      const product = await repository.save(repository.create(data));
+
       if (variations?.length)
         await this.variationsService.create(product.id, variations, tx);
 
@@ -32,19 +36,16 @@ export class ProductsService {
     });
   }
 
-  async findAll(props: PageOptions<Product>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.product.findMany(props),
-      this.prismaService.product.count(props),
-    ]);
+  async findAll(props: PageOptions<ProductEntity>) {
+    const [data, total] = await this.productRepository.findAndCount(props);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
     return { data, meta };
   }
 
-  async findOne(id: string) {
-    const product = await this.prismaService.product.findFirst({
+  async findOne(id: number) {
+    const product = await this.productRepository.findOne({
       where: { id },
     });
 
@@ -53,7 +54,7 @@ export class ProductsService {
     return product;
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto) {
+  async update(id: number, updateProductDto: UpdateProductDto) {
     const product = await this.findOne(id);
 
     if (
@@ -70,14 +71,16 @@ export class ProductsService {
       await this.categoriesService.findOne(updateProductDto.categoryId);
     }
 
-    return this.prismaService.product.update({
-      where: { id },
-      data: updateProductDto,
-    });
+    await this.productRepository.update(id, updateProductDto);
+
+    return await this.findOne(id);
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
-    return this.prismaService.product.delete({ where: { id } });
+  async remove(id: number) {
+    const product = await this.findOne(id);
+
+    await this.productRepository.delete(id);
+
+    return product;
   }
 }

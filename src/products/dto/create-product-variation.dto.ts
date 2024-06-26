@@ -4,16 +4,19 @@ import {
   IsOptional,
   IsString,
   IsUUID,
+  Length,
   Min,
 } from 'class-validator';
 
 export class CreateProductVariationDTO {
   @IsString()
-  @IsNotEmpty()
+  @IsOptional()
+  @Length(0, 60)
   variation: string;
 
   @IsString()
   @IsNotEmpty()
+  @Length(0, 15)
   externalCode: string;
 
   @IsNumber()
@@ -27,5 +30,6 @@ export class CreateProductVariationDTO {
 
   @IsString()
   @IsOptional()
+  @Length(0, 20)
   barCode?: string;
 }

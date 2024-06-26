@@ -1,47 +1,50 @@
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Prisma, ProductVariation } from '@prisma/client';
-import { PrismaService } from '@/prima.service';
-import { Transaction } from '@/@types/prisma';
+import { EntityManager, FindOptionsRelations, Repository } from 'typeorm';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { ProductVariationEntity } from './variations.entity';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
 
 @Injectable()
 export class VariationsServices {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(ProductVariationEntity)
+    private readonly variationRepository: Repository<ProductVariationEntity>,
+  ) {}
 
   async create(
-    productId: string,
+    productId: number,
     payloads: Array<CreateProductVariationDTO>,
-    tx?: Transaction,
+    tx?: EntityManager,
   ) {
-    const service = tx ?? this.prismaService;
+    const repository =
+      tx !== undefined
+        ? tx.getRepository(ProductVariationEntity)
+        : this.variationRepository;
 
-    return await service.productVariation.createMany({
-      data: payloads.map((payload) => ({
-        ...payload,
-        productId,
-      })),
-    });
+    return await repository.save(
+      repository.create(payloads.map((payload) => ({ ...payload, productId }))),
+    );
   }
 
   async findAll(
-    params: PageOptions<ProductVariation>,
-    include?: Prisma.ProductVariationInclude,
+    params: PageOptions<ProductVariationEntity>,
+    relations?: FindOptionsRelations<ProductVariationEntity>,
   ) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.productVariation.findMany({ ...params, include }),
-      this.prismaService.productVariation.count(params),
-    ]);
+    const [data, total] = await this.variationRepository.findAndCount({
+      ...params,
+      relations,
+    });
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 
     return { data, meta };
   }
 
-  async findOne(id: string, productId?: string) {
-    const variation = await this.prismaService.productVariation.findFirst({
+  async findOne(id: string, productId?: number) {
+    const variation = await this.variationRepository.findOne({
       where: { id, productId },
     });
 
@@ -53,18 +56,20 @@ export class VariationsServices {
   async update(
     id: string,
     payload: UpdateProductVariationDTO,
-    productId?: string,
+    productId?: number,
   ) {
     await this.findOne(id, productId);
 
-    return this.prismaService.productVariation.update({
-      where: { id },
-      data: payload,
-    });
+    await this.variationRepository.update(id, payload);
+
+    return await this.findOne(id, productId);
   }
 
-  async remove(id: string, productId: string) {
-    await this.findOne(id, productId);
-    return await this.prismaService.productVariation.delete({ where: { id } });
+  async remove(id: string, productId: number) {
+    const variation = await this.findOne(id, productId);
+
+    await this.variationRepository.delete(id);
+
+    return variation;
   }
 }

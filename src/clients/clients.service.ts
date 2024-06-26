@@ -1,23 +1,29 @@
-import { Client } from '@prisma/client';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prima.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { ClientEntity } from './clients.entity';
 import { CreateClientDTO } from './dto/create-client.dto';
 import { UpdateClientDTO } from './dto/update-client.dto';
 
 @Injectable()
 export class ClientsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(ClientEntity)
+    private readonly clientRepository: Repository<ClientEntity>,
+  ) {}
 
   async create(data: CreateClientDTO) {
-    const client = await this.prismaService.client.create({ data });
+    const client = await this.clientRepository.save(
+      this.clientRepository.create(data),
+    );
 
     return client;
   }
 
   async findOne(id: string, raiseException = true) {
-    const client = await this.prismaService.client.findUnique({
+    const client = await this.clientRepository.findOne({
       where: { id },
     });
 
@@ -31,21 +37,18 @@ export class ClientsService {
     if (id) return await this.findOne(id);
 
     const defaultName = 'Comprador Avulso';
-    const defaultClient = await this.prismaService.client.findFirst({
+    const defaultClient = await this.clientRepository.findOne({
       where: { name: defaultName },
     });
 
     return defaultClient;
   }
 
-  async findAll(params: PageOptions<Client>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.client.findMany({
-        ...params,
-        select: { id: true, name: true, createdAt: true, updatedAt: true },
-      }),
-      this.prismaService.client.count(params),
-    ]);
+  async findAll(params: PageOptions<ClientEntity>) {
+    const [data, total] = await this.clientRepository.findAndCount({
+      ...params,
+      select: { id: true, name: true, createdAt: true, updatedAt: true },
+    });
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 
@@ -55,18 +58,15 @@ export class ClientsService {
   async update(id: string, data: UpdateClientDTO) {
     await this.findOne(id);
 
-    const client = await this.prismaService.client.update({
-      where: { id },
-      data,
-    });
+    await this.clientRepository.update(id, data);
 
-    return client;
+    return await this.findOne(id);
   }
 
   async delete(id: string) {
     const client = await this.findOne(id);
 
-    await this.prismaService.client.delete({ where: { id } });
+    await this.clientRepository.delete(id);
 
     return client;
   }

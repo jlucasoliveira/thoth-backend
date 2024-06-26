@@ -1,8 +1,9 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateClientDTO {
   @IsString()
   @IsNotEmpty()
+  @Length(3, 60)
   name: string;
 
   @IsString()
@@ -11,5 +12,6 @@ export class CreateClientDTO {
 
   @IsString()
   @IsOptional()
+  @Length(6, 60)
   email: string;
 }

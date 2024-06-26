@@ -9,10 +9,10 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { Brand } from '@prisma/client';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import { BrandEntity } from './brands.entity';
 import { BrandsService } from './brands.service';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { UpdateBrandDto } from './dto/update-brand.dto';
@@ -23,16 +23,16 @@ export class BrandsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<Brand>,
-    @Query('sort', SortPipe) orderBy: OrderBy<Brand>,
+    @Query('filter', FilterPipe) where: Filter<BrandEntity>,
+    @Query('sort', SortPipe) order: OrderBy<BrandEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
   ) {
-    return this.brandsService.findAll({ where, orderBy, take, skip });
+    return this.brandsService.findAll({ where, order, take, skip });
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     return this.brandsService.findOne(id);
   }
 
@@ -42,12 +42,15 @@ export class BrandsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() payload: UpdateBrandDto) {
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() payload: UpdateBrandDto,
+  ) {
     return this.brandsService.update(id, payload);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  delete(@Param('id', ParseIntPipe) id: number) {
     return this.brandsService.delete(id);
   }
 }

@@ -1,47 +1,51 @@
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '@/prima.service';
-import { CreateBrandDto } from './dto/create-brand.dto';
-import { UpdateBrandDto } from './dto/update-brand.dto';
-import { Brand } from '@prisma/client';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { BrandEntity } from './brands.entity';
+import { CreateBrandDto } from './dto/create-brand.dto';
+import { UpdateBrandDto } from './dto/update-brand.dto';
 
 @Injectable()
 export class BrandsService {
-  constructor(private readonly prismaService: PrismaService) {}
+  constructor(
+    @InjectRepository(BrandEntity)
+    private readonly brandRepository: Repository<BrandEntity>,
+  ) {}
 
-  create(data: CreateBrandDto) {
-    return this.prismaService.brand.create({ data });
+  async create(data: CreateBrandDto) {
+    return await this.brandRepository.save(this.brandRepository.create(data));
   }
 
-  async findAll(props: PageOptions<Brand>) {
-    const [data, total] = await this.prismaService.$transaction([
-      this.prismaService.brand.findMany(props),
-      this.prismaService.brand.count(),
-    ]);
+  async findAll(props: PageOptions<BrandEntity>) {
+    const [data, total] = await this.brandRepository.findAndCount(props);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
     return { data, meta };
   }
 
-  async findOne(id: string) {
-    const brand = await this.prismaService.brand.findFirst({ where: { id } });
+  async findOne(id: number) {
+    const brand = await this.brandRepository.findOne({ where: { id } });
 
     if (!brand) throw new NotFoundException('Marca não encontrada');
 
     return brand;
   }
 
-  async update(id: string, data: UpdateBrandDto) {
+  async update(id: number, data: UpdateBrandDto) {
     await this.findOne(id);
 
-    return this.prismaService.brand.update({ where: { id }, data });
+    await this.brandRepository.update(id, data);
+
+    return await this.findOne(id);
   }
 
-  async delete(id: string) {
+  async delete(id: number) {
     const brand = await this.findOne(id);
-    await this.prismaService.brand.delete({ where: { id } });
+
+    await this.brandRepository.delete(id);
 
     return brand;
   }

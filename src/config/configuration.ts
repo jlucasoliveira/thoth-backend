@@ -27,17 +27,12 @@ export const SENTRY_CONFIG = {
   isEnabled: NODE_ENV === 'production',
 };
 
-const endpointPort = asInt(process.env.MINIO_ENDPOINT_PORT, 9000);
-
 export const MINIO_CONFIG = {
-  endpointPort,
   endpointUrl: process.env.MINIO_ENDPOINT_URL,
-  useSSL: process.env.MINIO_ENDPOINT_USE_SSL === 'true',
   accessKey: process.env.MINIO_ACCESS_KEY,
   secretKey: process.env.MINIO_SECRET_KEY,
   bucket: process.env.MINIO_BUCKET_NAME,
   signed: {
-    host: `${new URL(PUBLIC_URL).hostname}:${endpointPort}`,
     expires: asInt(process.env.MINIO_SIGNED_EXPIRES_IN, 5 * 60 * 1000),
   },
 };

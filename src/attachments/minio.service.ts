@@ -23,9 +23,6 @@ export class MinIOService {
       MINIO_CONFIG.bucket,
       key,
       MINIO_CONFIG.signed.expires,
-      {},
-      new Date(),
-      MINIO_CONFIG.signed.host,
     );
   }
 

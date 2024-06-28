@@ -8,6 +8,7 @@ on:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    environment: Deployment
     steps:
       - uses: actions/checkout@v4
       - name: Use Nodejs

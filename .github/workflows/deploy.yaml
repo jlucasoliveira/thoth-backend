@@ -34,5 +34,5 @@ jobs:
           SCRIPT_AFTER: |
             echo $RSYNC_STDOUT
             cd ${{ secrets.REMOTE_TARGET }}
-            sh -c "pm2 restart thoth --update-env"
+            sh -c "~/.nvm/versions/node/v20.15.0/lib/node_modules/pm2/bin/pm2 restart thoth --update-env"
           SCRIPT_AFTER_REQUIRED: true

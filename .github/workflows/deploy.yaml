@@ -31,3 +31,7 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
           EXCLUDE: '/dist/, /node_modules/'
+          SCRIPT_AFTER: |
+            touch ${{ secrets.REMOTE_TARGET }}/.env
+            echo ${{ secrets.ENV_FILE }} > ${{ secrets.REMOTE_TARGET }}/.env
+          SCRIPT_AFTER_REQUIRED: true

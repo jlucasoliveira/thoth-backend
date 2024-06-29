@@ -31,13 +31,8 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
           EXCLUDE: '/dist/, /node_modules/'
-          SCRIPT_BEFORE: |
-            whoami
-            ls -al
           SCRIPT_AFTER: |
-            whoami
-            ls -al
             echo $RSYNC_STDOUT
             cd ${{ secrets.REMOTE_TARGET }}
-            pm2 restart thoth --update-env
+            sh -c "pm2 restart thoth --update-env"
           SCRIPT_AFTER_REQUIRED: true

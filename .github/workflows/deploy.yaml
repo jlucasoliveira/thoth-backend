@@ -33,20 +33,20 @@ jobs:
           EXCLUDE: '/dist/, /node_modules/'
           SCRIPT_AFTER: |
             touch ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ vars.NODE_ENV }} > ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.SENTRY_DSN }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.JWT_SECRET }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.DEFAULT_ADMIN_USER }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.MINIO_ENDPOINT_URL }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.MINIO_ACCESS_KEY }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.MINIO_SECRET_KEY }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.MINIO_BUCKET_NAME }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.MINIO_SIGNED_EXPIRES_IN }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_HOST }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_PORT }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_DATABASE }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_USER }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_WALLET_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
-            ${{ secrets.ORACLE_CONNECT_STRING }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo NODE_ENV=${{ vars.NODE_ENV }} > ${{ secrets.REMOTE_TARGET }}/.env
+            echo SENTRY_DSN=${{ secrets.SENTRY_DSN }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo JWT_SECRET=${{ secrets.JWT_SECRET }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo DEFAULT_ADMIN_USER=${{ secrets.DEFAULT_ADMIN_USER }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo MINIO_ENDPOINT_URL=${{ secrets.MINIO_ENDPOINT_URL }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo MINIO_ACCESS_KEY=${{ secrets.MINIO_ACCESS_KEY }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo MINIO_SECRET_KEY=${{ secrets.MINIO_SECRET_KEY }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo MINIO_BUCKET_NAME=${{ secrets.MINIO_BUCKET_NAME }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo MINIO_SIGNED_EXPIRES_IN=${{ secrets.MINIO_SIGNED_EXPIRES_IN }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_HOST=${{ secrets.ORACLE_HOST }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_PORT=${{ secrets.ORACLE_PORT }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_DATABASE=${{ secrets.ORACLE_DATABASE }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_USER=${{ secrets.ORACLE_USER }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_WALLET_PASSWORD=${{ secrets.ORACLE_WALLET_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            echo ORACLE_CONNECT_STRING=${{ secrets.ORACLE_CONNECT_STRING }} >> ${{ secrets.REMOTE_TARGET }}/.env
           SCRIPT_AFTER_REQUIRED: true

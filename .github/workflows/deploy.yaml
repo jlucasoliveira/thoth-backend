@@ -31,8 +31,3 @@ jobs:
           REMOTE_USER: ${{ secrets.REMOTE_USER }}
           TARGET: ${{ secrets.REMOTE_TARGET }}
           EXCLUDE: '/dist/, /node_modules/'
-          SCRIPT_AFTER: |
-            echo $RSYNC_STDOUT
-            cd ${{ secrets.REMOTE_TARGET }}
-            bash -ci pm2 restart thoth --update-env
-          SCRIPT_AFTER_REQUIRED: true

@@ -1,4 +1,5 @@
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { RavenInterceptor, RavenModule } from 'nest-raven';
@@ -18,6 +19,7 @@ import { oracleConnectionConfig } from './config/data-source';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     RavenModule,
     LoggerModule.forRoot({
       pinoHttp: {

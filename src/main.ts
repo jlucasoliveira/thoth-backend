@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';

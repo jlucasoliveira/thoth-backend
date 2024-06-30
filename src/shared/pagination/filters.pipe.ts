@@ -32,6 +32,8 @@ export class SortPipe implements PipeTransform {
 @Injectable()
 export class IncludePipe implements PipeTransform {
   convertIntoBoolean(obj: any): Record<string, boolean | object> {
+    if (!obj) return {};
+
     const values = Object.entries(obj).map(([key, value]) => {
       if (typeof value === 'string')
         if (['true', 'false'].includes(value)) return [key, value === 'true'];

@@ -18,6 +18,12 @@ export const PUBLIC_URL = process.env.PUBLIC_URL;
 
 export const PORT = asInt(process.env.PORT, 3000);
 
+export const API_VERSION = 'v1';
+
+export const GLOBAL_PREFIX = `${
+  NODE_ENV === 'production' ? '' : '/api'
+}/${API_VERSION}`;
+
 export const JWT_CONFIG = {
   secret: process.env.JWT_SECRET,
   expireIn: process.env.JWT_EXPIRE_IN ?? '30d',

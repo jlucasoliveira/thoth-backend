@@ -5,7 +5,7 @@ import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';
 import { Logger } from 'nestjs-pino';
 import { AppModule } from './app.module';
-import { PORT, SENTRY_CONFIG } from './config/configuration';
+import { GLOBAL_PREFIX, PORT, SENTRY_CONFIG } from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -23,7 +23,7 @@ async function bootstrap() {
   });
 
   app.useLogger(app.get(Logger));
-  app.setGlobalPrefix('/api/v1');
+  app.setGlobalPrefix(GLOBAL_PREFIX);
 
   await app.listen(PORT);
 }

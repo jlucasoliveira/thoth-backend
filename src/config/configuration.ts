@@ -1,4 +1,5 @@
 import { join } from 'node:path';
+import { userInfo } from 'node:os';
 
 function asInt(value?: string, defaultValue?: number): number {
   if (value === undefined && defaultValue === undefined)
@@ -47,7 +48,10 @@ export const ORACLE_CONFIG = {
   password: process.env.ORACLE_PASSWORD,
   connectString: process.env.ORACLE_CONNECT_STRING,
   walletPassword: process.env.ORACLE_WALLET_PASSWORD,
-  walletPath: join(__dirname, '..', '..', 'oracle-certificates'),
+  walletPath:
+    NODE_ENV === 'production'
+      ? join(userInfo().homedir, '.config', 'oracle-certificates')
+      : join(__dirname, '..', '..', 'oracle-certificates'),
   entitiesPath: join(__dirname, '..', '**', '*.entity.{ts,js}'),
   migrationsPath: join(__dirname, '..', '..', 'migrations', '*.{ts,js}'),
 };

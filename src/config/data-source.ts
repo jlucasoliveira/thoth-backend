@@ -1,6 +1,6 @@
 import { DataSource } from 'typeorm';
-import { ORACLE_CONFIG } from './configuration';
 import { OracleConnectionOptions } from 'typeorm/driver/oracle/OracleConnectionOptions';
+import { NODE_ENV, ORACLE_CONFIG } from './configuration';
 
 export function oracleConnectionConfig(): OracleConnectionOptions {
   return {
@@ -13,6 +13,7 @@ export function oracleConnectionConfig(): OracleConnectionOptions {
     logger: ORACLE_CONFIG.isDebug ? 'file' : 'advanced-console',
     entities: [ORACLE_CONFIG.entitiesPath],
     migrations: [ORACLE_CONFIG.migrationsPath],
+    migrationsRun: NODE_ENV === 'production',
     useUTC: true,
     extra: {
       walletLocation: ORACLE_CONFIG.walletPath,

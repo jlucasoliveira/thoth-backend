@@ -49,4 +49,5 @@ jobs:
             echo ORACLE_PASSWORD=${{ secrets.ORACLE_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
             echo ORACLE_WALLET_PASSWORD=${{ secrets.ORACLE_WALLET_PASSWORD }} >> ${{ secrets.REMOTE_TARGET }}/.env
             echo ORACLE_CONNECT_STRING=${{ secrets.ORACLE_CONNECT_STRING }} >> ${{ secrets.REMOTE_TARGET }}/.env
+            sh -c '${{ vars.SERVER_MANAGER }} restart thoth-backend --update-env'
           SCRIPT_AFTER_REQUIRED: true

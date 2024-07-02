@@ -1,3 +1,14 @@
+import {
+  Between,
+  ILike,
+  In,
+  LessThan,
+  LessThanOrEqual,
+  Like,
+  MoreThan,
+  MoreThanOrEqual,
+  Not,
+} from 'typeorm';
 import { Filter } from './pageOptions.dto';
 
 type QueryKey =
@@ -57,23 +68,20 @@ export function parseFilterIntoQueryWhere<EntityType>(
         where[key] = convert(filterValue['eq']);
         break;
       case 'ne':
-        where[key] = { not: convert(filterValue['ne']) };
+        where[key] = Not(convert(filterValue['ne']));
         break;
       case 'like':
-        where[key] = { contains: convert(filterValue['like']) };
+        where[key] = Like(convert(filterValue['like']));
         break;
       case 'ilike':
-        where[key] = {
-          contains: convert(filterValue['ilike']),
-          mode: 'insensitive',
-        };
+        where[key] = ILike(convert(filterValue['ilike']));
         break;
       case 'between':
         const [start, end] = filterValue['between'];
-        where[key] = { gte: convert(start), lte: convert(end) };
+        where[key] = Between(convert(start), convert(end));
         break;
       case 'in':
-        where[key] = { in: convert(filterValue['in']) };
+        where[key] = In(convert(filterValue['in']));
         break;
       case 'or':
         const orFilters = filterValue['or'];
@@ -82,16 +90,16 @@ export function parseFilterIntoQueryWhere<EntityType>(
         );
         break;
       case 'gte':
-        where[key] = { gte: convert(filterValue['gte']) };
+        where[key] = MoreThanOrEqual(convert(filterValue['gte']));
         break;
       case 'lte':
-        where[key] = { lte: convert(filterValue['lte']) };
+        where[key] = LessThanOrEqual(convert(filterValue['lte']));
         break;
       case 'gt':
-        where[key] = { gt: convert(filterValue['gt']) };
+        where[key] = MoreThan(convert(filterValue['gt']));
         break;
       case 'lt':
-        where[key] = { lt: convert(filterValue['lt']) };
+        where[key] = LessThan(convert(filterValue['lt']));
         break;
       default:
         where[key] = parseFilterIntoQueryWhere(filterValue);

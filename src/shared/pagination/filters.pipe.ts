@@ -1,6 +1,6 @@
 import { validate } from 'class-validator';
 import { ArgumentMetadata, Injectable, PipeTransform } from '@nestjs/common';
-import { parseFilterIntoQueryWhere, parseSortQueryParam } from './filters';
+import { parseFilterIntoQueryWhere, parseSortQueryParam } from './utils';
 import { PageOptionDto } from './pageOptions.dto';
 
 @Injectable()

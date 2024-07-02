@@ -46,6 +46,8 @@ function convert(input: any): any {
   const inDate = new Date(input);
   if (inDate.toString() !== 'Invalid Date') return inDate;
 
+  if (Array.isArray(input)) return input.map((value) => convert(value));
+
   return input;
 }
 

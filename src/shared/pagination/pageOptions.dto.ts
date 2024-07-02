@@ -14,7 +14,8 @@ export type FilterOperator<AttributeType> = AttributeType extends BaseEntity
       | { like: AttributeType }
       | { ilike: AttributeType }
       | { between: [AttributeType, AttributeType] }
-      | { or: Filter<AttributeType>[] }
+      | { or: FilterOperator<AttributeType>[] }
+      | { and: FilterOperator<AttributeType>[] }
       | { in: AttributeType[] }
       | { gte: AttributeType }
       | { lte: AttributeType };

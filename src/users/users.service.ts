@@ -15,7 +15,9 @@ type UserUpdatePayload =
   | { password: string };
 
 type UserUpdateOptions = {
+  /** Refetch user after execute the update */
   refresh?: boolean;
+  /** Checks if user exists before execute the update */
   validateExists?: boolean;
 };
 

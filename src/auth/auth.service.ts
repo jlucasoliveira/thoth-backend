@@ -1,5 +1,9 @@
 import * as bcrypt from 'bcrypt';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '@/users/users.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
@@ -48,18 +52,16 @@ export class AuthService {
     return this.usersService.findOne(userId);
   }
 
-  async changePassword(user: Express.User, payload: ChangePasswordDTO) {
-    const currentUser = await this.validateUser(
-      user.username,
-      payload.password,
-    );
+  async changePassword(payload: ChangePasswordDTO) {
+    if (payload.newPassword !== payload.confirmPassword)
+      throw new BadRequestException('As senhas não coincidem!');
 
-    const hashNewPassword = await bcrypt.hash(payload.newPassword, 10);
+    const password = await bcrypt.hash(payload.newPassword, 10);
 
     await this.usersService.update(
-      currentUser.id,
-      { password: hashNewPassword },
-      { refresh: false, validateExists: false },
+      payload.userId,
+      { password },
+      { refresh: false },
     );
   }
 }

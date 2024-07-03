@@ -38,15 +38,15 @@ export class ProductVariationEntity extends BaseEntity {
   @OneToOne(() => StockEntity, (stock) => stock.variation)
   stock: StockEntity;
 
-  @Column({ name: 'icon_id' })
-  iconId: string;
+  @Column({ name: 'icon_id', nullable: true })
+  iconId?: string;
 
   @OneToOne(() => AttachmentEntity, (attachment) => attachment.variationIcon)
   @JoinColumn({
     name: 'icon_id',
     foreignKeyConstraintName: 'FK_variation_icon_to_attachment',
   })
-  icon: AttachmentEntity;
+  icon?: AttachmentEntity;
 
   @OneToMany(() => AttachmentEntity, (attachment) => attachment.variation)
   images: AttachmentEntity[];

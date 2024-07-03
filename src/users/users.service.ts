@@ -9,6 +9,21 @@ import { UserEntity } from './users.entity';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 
+type UserUpdatePayload =
+  | UpdateUserDto
+  | { lastLogin: Date }
+  | { password: string };
+
+type UserUpdateOptions = {
+  refresh?: boolean;
+  validateExists?: boolean;
+};
+
+const updateOptions: UserUpdateOptions = {
+  refresh: true,
+  validateExists: true,
+};
+
 @Injectable()
 export class UsersService {
   constructor(
@@ -72,12 +87,16 @@ export class UsersService {
     return withPassword ? user : (exclude(user, ['password']) as UserEntity);
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto | { lastLogin: Date }) {
-    await this.findOne(id);
+  async update(
+    id: string,
+    updateUserDto: UserUpdatePayload,
+    options: UserUpdateOptions = updateOptions,
+  ) {
+    if (options.validateExists !== false) await this.findOne(id);
 
     await this.userRepository.update(id, updateUserDto);
 
-    return await this.findOne(id);
+    if (options.refresh !== false) return await this.findOne(id);
   }
 
   async remove(id: string) {

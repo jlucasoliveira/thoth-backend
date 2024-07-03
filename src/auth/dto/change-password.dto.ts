@@ -1,10 +1,10 @@
-import { IsNotEmpty, IsString, Length, ValidateIf } from 'class-validator';
+import { IsNotEmpty, IsString, IsUUID, Length } from 'class-validator';
 
 export class ChangePasswordDTO {
   @IsString()
+  @IsUUID('4')
   @IsNotEmpty()
-  @Length(8)
-  password: string;
+  userId: string;
 
   @IsString()
   @IsNotEmpty()
@@ -14,6 +14,5 @@ export class ChangePasswordDTO {
   @IsString()
   @IsNotEmpty()
   @Length(8)
-  @ValidateIf((o: ChangePasswordDTO, value: string) => o.newPassword === value)
   confirmPassword: string;
 }

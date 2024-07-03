@@ -3,6 +3,7 @@ import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '@/users/users.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
+import { ChangePasswordDTO } from './dto/change-password.dto';
 
 @Injectable()
 export class AuthService {
@@ -30,7 +31,11 @@ export class AuthService {
       sub: user.id,
     });
 
-    await this.usersService.update(user.id, { lastLogin: new Date() });
+    await this.usersService.update(
+      user.id,
+      { lastLogin: new Date() },
+      { refresh: false, validateExists: false },
+    );
 
     return { accessToken };
   }
@@ -41,5 +46,20 @@ export class AuthService {
 
   me(userId: string) {
     return this.usersService.findOne(userId);
+  }
+
+  async changePassword(user: Express.User, payload: ChangePasswordDTO) {
+    const currentUser = await this.validateUser(
+      user.username,
+      payload.password,
+    );
+
+    const hashNewPassword = await bcrypt.hash(payload.newPassword, 10);
+
+    await this.usersService.update(
+      currentUser.id,
+      { password: hashNewPassword },
+      { refresh: false, validateExists: false },
+    );
   }
 }

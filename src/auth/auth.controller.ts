@@ -1,8 +1,9 @@
-import { Request } from 'express';
-import { Body, Controller, Get, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, HttpCode, Post } from '@nestjs/common';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { AuthService } from './auth.service';
 import { Public } from './guards/public.decorator';
+import { User } from './guards/user.decorator';
+import { ChangePasswordDTO } from './dto/change-password.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -24,7 +25,13 @@ export class AuthController {
   }
 
   @Get('me')
-  me(@Req() request: Request) {
-    return this.authService.me(request.user?.id);
+  me(@User() user: Express.User) {
+    return this.authService.me(user?.id);
+  }
+
+  @Post('change-password')
+  @HttpCode(204)
+  changePassword(@Body() payload: ChangePasswordDTO) {
+    return this.authService.changePassword(payload);
   }
 }

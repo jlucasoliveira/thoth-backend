@@ -8,6 +8,7 @@ import {
   Controller,
   Query,
   ParseIntPipe,
+  ValidationPipe,
 } from '@nestjs/common';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
@@ -42,7 +43,10 @@ export class UsersController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  update(
+    @Param('id') id: string,
+    @Body(new ValidationPipe({ whitelist: true })) updateUserDto: UpdateUserDto,
+  ) {
     return this.usersService.update(id, updateUserDto);
   }
 

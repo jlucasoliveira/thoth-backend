@@ -46,7 +46,7 @@ export class ProductVariationEntity extends BaseEntity {
     name: 'icon_id',
     foreignKeyConstraintName: 'FK_variation_icon_to_attachment',
   })
-  icon: AttachmentEntity;
+  icon?: AttachmentEntity;
 
   @OneToMany(() => AttachmentEntity, (attachment) => attachment.variation)
   images: AttachmentEntity[];

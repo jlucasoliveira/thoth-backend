@@ -31,7 +31,7 @@ export class AuthController {
 
   @Post('change-password')
   @HttpCode(204)
-  changePassword(@User() user: Express.User, payload: ChangePasswordDTO) {
-    return this.authService.changePassword(user, payload);
+  changePassword(@Body() payload: ChangePasswordDTO) {
+    return this.authService.changePassword(payload);
   }
 }

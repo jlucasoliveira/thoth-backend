@@ -2,15 +2,14 @@ name: Track Release (Sentry)
 
 on:
   workflow_run:
-    workflows: ['Deploy']
+    workflows: [Deploy]
     types: [completed]
-    branches:
-      - 'main'
 
 jobs:
   release:
     runs-on: ubuntu-latest
     environment: SentryRelease
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     steps:
       - uses: actions/checkout@v3
         with:

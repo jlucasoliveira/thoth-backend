@@ -1,0 +1,25 @@
+name: Track Release (Sentry)
+
+on:
+  workflow_run:
+    workflows: ['Deploy']
+    types: [completed]
+    branches:
+      - 'main'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: SentryRelease
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Create Sentry release
+        uses: getsentry/action-release@v1
+        env:
+          SENTRY_AUTH_TOKEN: ${{ secrets.SENTRY_AUTH_TOKEN }}
+          SENTRY_ORG: ${{ secrets.SENTRY_ORG }}
+          SENTRY_PROJECT: ${{ secrets.SENTRY_PROJECT }}
+        with:
+          environment: production

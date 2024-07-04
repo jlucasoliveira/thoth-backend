@@ -9,6 +9,7 @@ import { ClientsService } from '@/clients/clients.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { StockEntity } from '@/stock/stock.entity';
+import { ClientEntity } from '@/clients/clients.entity';
 import { ProductVariationEntity } from '@/products/variations.entity';
 import { OrderEntity } from './orders.entity';
 import { OrderItemEntity } from './order-items.entity';
@@ -82,8 +83,11 @@ export class OrdersService {
     return { total, items };
   }
 
-  private async _create(tx: EntityManager, data: CreateOrderDTO) {
-    const client = await this.clientService.findOneOrDefault(data.userId);
+  private async _create(
+    tx: EntityManager,
+    client: ClientEntity,
+    data: CreateOrderDTO,
+  ) {
     const orderRepository = tx.getRepository(OrderEntity);
     const order = await orderRepository.save(
       orderRepository.create({ total: 0, clientId: client.id }),
@@ -98,18 +102,23 @@ export class OrdersService {
     const orderItemRepository = tx.getRepository(OrderItemEntity);
     await orderItemRepository.save(orderItemRepository.create(items));
 
-    return await orderRepository.update(order.id, {
+    await orderRepository.update(order.id, {
       total,
       paid: data.paid,
       clientId: client.id,
       totalPaid: data.totalPaid,
-      paidDate: data.totalPaid === total ? new Date() : undefined,
+      paidDate:
+        data.totalPaid === total ? () => 'CURRENT_TIMESTAMP' : undefined,
     });
+
+    return order;
   }
 
   async create(data: CreateOrderDTO) {
-    return await this.orderRepository.manager.transaction(
-      async (tx) => await this._create(tx, data),
+    const client = await this.clientService.findOneOrDefault(data.userId);
+
+    await this.orderRepository.manager.transaction(
+      async (tx) => await this._create(tx, client, data),
     );
   }
 

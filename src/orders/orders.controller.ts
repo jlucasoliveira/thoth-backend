@@ -10,6 +10,7 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { User } from '@/auth/guards/user.decorator';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { OrderBy } from '@/shared/pagination/filters';
@@ -23,8 +24,8 @@ export class OrdersController {
   constructor(private readonly ordersService: OrdersService) {}
 
   @Post()
-  create(@Body() payload: CreateOrderDTO) {
-    return this.ordersService.create(payload);
+  create(@User() seller: Express.User, @Body() payload: CreateOrderDTO) {
+    return this.ordersService.create(seller, payload);
   }
 
   @Get()

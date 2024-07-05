@@ -36,9 +36,8 @@ export class ClientsService {
   async findOneOrDefault(id?: string) {
     if (id) return await this.findOne(id);
 
-    const defaultName = 'Comprador Avulso';
     const defaultClient = await this.clientRepository.findOne({
-      where: { name: defaultName },
+      where: { name: ClientEntity.defaultName },
     });
 
     return defaultClient;

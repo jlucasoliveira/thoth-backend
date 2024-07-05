@@ -16,6 +16,7 @@ import { ClientsModule } from './clients/clients.module';
 import { OrdersModule } from './orders/orders.module';
 import { NODE_ENV } from './config/configuration';
 import { oracleConnectionConfig } from './config/data-source';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { oracleConnectionConfig } from './config/data-source';
     AttachmentsModule,
     ClientsModule,
     OrdersModule,
+    PaymentsModule,
   ],
   providers: [
     {

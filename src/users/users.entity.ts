@@ -26,6 +26,7 @@ export class UserEntity extends BaseEntity {
   lastLogin?: Date;
 
   @Column({
+    type: 'char',
     name: 'is_admin',
     default: OracleBoolean.false,
     transformer: convertIntoBoolean('isAdmin'),

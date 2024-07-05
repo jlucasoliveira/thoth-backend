@@ -9,6 +9,7 @@ import { OrderItemEntity } from './order-items.entity';
 @Entity({ name: 'orders' })
 export class OrderEntity extends BaseEntity {
   @Column({
+    type: 'char',
     default: OracleBoolean.false,
     transformer: convertIntoBoolean('paid'),
   })

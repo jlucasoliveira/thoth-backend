@@ -6,8 +6,10 @@ import {
   IsOptional,
   IsString,
   IsUUID,
-  MinLength,
+  ArrayMinSize,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
 import { CreateOrderItemDTO } from './create-order-item.dto';
 
 export class CreateOrderDTO {
@@ -22,10 +24,12 @@ export class CreateOrderDTO {
   @IsUUID('4')
   @IsString()
   @IsOptional()
-  userId?: string;
+  clientId?: string;
 
   @IsArray()
-  @MinLength(1)
+  @ArrayMinSize(1)
   @IsObject({ each: true })
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderItemDTO)
   items: CreateOrderItemDTO[];
 }

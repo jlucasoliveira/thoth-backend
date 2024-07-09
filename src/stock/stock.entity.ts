@@ -6,10 +6,10 @@ import { StockLocationEntity } from './stock-locations.entity';
 
 @Entity({ name: 'stocks' })
 export class StockEntity extends BaseEntity {
-  @Column()
+  @Column({ type: 'float' })
   quantity: number;
 
-  @Column({ name: 'min_quantity', default: 0 })
+  @Column({ name: 'min_quantity', type: 'float', default: 0 })
   minQuantity: number;
 
   @Column({ name: 'variation_id' })

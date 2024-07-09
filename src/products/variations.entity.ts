@@ -23,7 +23,7 @@ export class ProductVariationEntity extends BaseEntity {
   @Column({ length: 20, name: 'bar_code', nullable: true })
   barcode?: string;
 
-  @Column()
+  @Column({ type: 'float' })
   price: number;
 
   @Column({ name: 'product_id' })

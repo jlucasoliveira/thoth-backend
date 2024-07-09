@@ -9,7 +9,7 @@ export class StockEntryEntity extends BaseEntity {
   @Column({ name: 'entry_date' })
   entryDate: Date;
 
-  @Column({ name: 'cost_price' })
+  @Column({ name: 'cost_price', type: 'float' })
   costPrice: number;
 
   @Column({ name: 'expiration_date' })

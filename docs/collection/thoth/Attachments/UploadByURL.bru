@@ -1,0 +1,22 @@
+meta {
+  name: UploadByURL
+  type: http
+  seq: 4
+}
+
+post {
+  url: {{base_url}}/attachments
+  body: json
+  auth: bearer
+}
+
+auth:bearer {
+  token: {{token}}
+}
+
+body:json {
+  {
+    "resource": "tests",
+    "uri": ""
+  }
+}

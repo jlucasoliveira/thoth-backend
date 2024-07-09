@@ -119,12 +119,6 @@ export class FilterParser<T> {
 
     const parser = factories[key as keyof typeof factories];
 
-    if (!parser) {
-      // ! With a invalid filter or a unknown relation will raise too deep recursion
-      return this.createNestedQuery;
-      // throw new BadRequestException('Invalid filter');
-    }
-
     return parser;
   }
 
@@ -136,7 +130,9 @@ export class FilterParser<T> {
           key as keyof FilterOperator<T[keyof T]>,
         );
 
-        this.query[attr] = parser(value as any);
+        this.query[attr] = parser
+          ? parser(value as any)
+          : this.createNestedQuery({ [key]: value } as Filter<T[keyof T]>);
       });
     }
 

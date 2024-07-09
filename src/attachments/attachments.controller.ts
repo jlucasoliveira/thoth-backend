@@ -71,6 +71,11 @@ export class AttachmentsController {
     return this.attachmentService.upload(file, data);
   }
 
+  @Post('by-uri')
+  updateByURI(@Body('uri') uri: string, @Body() payload: CreateAttachmentDTO) {
+    return this.attachmentService.uploadByURI(uri, payload);
+  }
+
   @Delete(':id')
   delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.attachmentService.delete(id);

@@ -9,6 +9,8 @@ import { ClientsService } from '@/clients/clients.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { StockEntity } from '@/stock/stock.entity';
+import { ClientEntity } from '@/clients/clients.entity';
+import { ProductEntity } from '@/products/products.entity';
 import { ProductVariationEntity } from '@/products/variations.entity';
 import { OrderEntity } from './orders.entity';
 import { OrderItemEntity } from './order-items.entity';
@@ -16,6 +18,13 @@ import { CreateOrderItemDTO } from './dto/create-order-item.dto';
 import { UpdateOrderDTO } from './dto/update-order.dto';
 import { CreateOrderDTO } from './dto/create-order.dto';
 import { Item, ResolvedOrder } from './types';
+
+type Variation = {
+  name: string;
+  variation?: string;
+  price: number;
+  quantity: number;
+};
 
 @Injectable()
 export class OrdersService {
@@ -36,15 +45,19 @@ export class OrdersService {
 
     const promises = orderItems.map<Promise<Item>>(
       async ({ variationId, quantity }) => {
-        const variation = await this.variationRepository.findOne({
-          where: { id: variationId },
-          select: {
-            price: true,
-            variation: true,
-            product: { name: true },
-            stock: { quantity: true },
-          },
-        });
+        const variation = await this.variationRepository
+          .createQueryBuilder('variation')
+          .leftJoin(StockEntity, 'stock', 'stock.variation_id = variation.id')
+          .leftJoin(
+            ProductEntity,
+            'product',
+            'product.id = variation.product_id',
+          )
+          .select('variation.price', 'price')
+          .addSelect('variation.variation', 'variation')
+          .addSelect('COALESCE(stock.quantity, 0)', 'quantity')
+          .addSelect('product.name')
+          .getRawOne<Variation>();
 
         if (!variation)
           throw new NotFoundException({
@@ -52,10 +65,10 @@ export class OrdersService {
             message: 'Produto não encontrado',
           });
 
-        if (variation.stock.quantity < quantity)
+        if (variation.quantity < quantity)
           throw new BadRequestException({
             id: variationId,
-            message: `${variation.product.name} - ${variation.variation} sem estoque.`,
+            message: `${variation.name} - ${variation.variation} sem estoque.`,
           });
 
         await tx
@@ -82,11 +95,20 @@ export class OrdersService {
     return { total, items };
   }
 
-  private async _create(tx: EntityManager, data: CreateOrderDTO) {
-    const client = await this.clientService.findOneOrDefault(data.userId);
+  private async _create(
+    tx: EntityManager,
+    client: ClientEntity,
+    seller: Express.User,
+    data: CreateOrderDTO,
+  ) {
     const orderRepository = tx.getRepository(OrderEntity);
     const order = await orderRepository.save(
-      orderRepository.create({ total: 0, clientId: client.id }),
+      orderRepository.create({
+        total: 0,
+        paid: data.paid,
+        clientId: client.id,
+        sellerId: seller.id,
+      }),
     );
 
     const { total, items } = await this.ensureInventory(
@@ -98,18 +120,20 @@ export class OrdersService {
     const orderItemRepository = tx.getRepository(OrderItemEntity);
     await orderItemRepository.save(orderItemRepository.create(items));
 
-    return await orderRepository.update(order.id, {
+    await orderRepository.update(order.id, {
       total,
-      paid: data.paid,
-      clientId: client.id,
       totalPaid: data.totalPaid,
-      paidDate: data.totalPaid === total ? new Date() : undefined,
+      paidDate: data.paid ? () => 'CURRENT_TIMESTAMP' : undefined,
     });
+
+    return order;
   }
 
-  async create(data: CreateOrderDTO) {
-    return await this.orderRepository.manager.transaction(
-      async (tx) => await this._create(tx, data),
+  async create(seller: Express.User, data: CreateOrderDTO) {
+    const client = await this.clientService.findOneOrDefault(data.clientId);
+
+    await this.orderRepository.manager.transaction(
+      async (tx) => await this._create(tx, client, seller, data),
     );
   }
 

@@ -8,10 +8,10 @@ export class OrderItemEntity extends BaseEntity {
   @Column()
   quantity: number;
 
-  @Column()
+  @Column({ type: 'float' })
   total: number;
 
-  @Column()
+  @Column({ type: 'float' })
   value: number;
 
   @Column({ name: 'order_id' })

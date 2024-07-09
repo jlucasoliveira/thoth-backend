@@ -104,7 +104,7 @@ export class ProductsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Param('productId', ParseIntPipe) productId: number,
   ) {
-    return this.deleteVariation(id, productId);
+    return this.variationsService.remove(id, productId);
   }
 
   @Delete(':id')

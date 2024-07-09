@@ -10,10 +10,10 @@ export class ProductEntity extends BaseEntity {
   @Column({ length: 60 })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   weight?: number;
 
-  @Column({ nullable: true })
+  @Column({ type: 'float', nullable: true })
   volume?: number;
 
   @Column({ length: 8, nullable: true })

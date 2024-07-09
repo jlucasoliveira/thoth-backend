@@ -7,7 +7,7 @@ export class BrandEntity extends BaseEntity {
   @Column({ length: 30 })
   name: string;
 
-  @Column({ name: 'profit_rate' })
+  @Column({ name: 'profit_rate', type: 'float' })
   profitRate: number;
 
   @OneToMany(() => ProductEntity, (product) => product.brand)

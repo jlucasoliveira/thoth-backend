@@ -1,4 +1,8 @@
 import sharp from 'sharp';
+import { URL } from 'node:url';
+import { basename } from 'node:path';
+import { lastValueFrom } from 'rxjs';
+import { HttpService } from '@nestjs/axios';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityManager, Repository } from 'typeorm';
 import { sync as getImageSize } from 'probe-image-size';
@@ -27,6 +31,7 @@ export class AttachmentsService {
     private readonly attachmentRepository: Repository<AttachmentEntity>,
     @InjectRepository(AttachmentSizeEntity)
     private readonly attachmentSizeRepository: Repository<AttachmentSizeEntity>,
+    private readonly httpService: HttpService,
     private readonly minioService: MinIOService,
   ) {}
 
@@ -228,6 +233,23 @@ export class AttachmentsService {
   async upload(file: Express.Multer.File, payload: CreateAttachmentDTO) {
     return await this.attachmentRepository.manager.transaction((tx) =>
       this._upload(tx, file, payload),
+    );
+  }
+
+  async getFile(uri: string) {
+    const { data } = await lastValueFrom(
+      this.httpService.get<Buffer>(uri, { responseType: 'arraybuffer' }),
+    );
+    return data;
+  }
+
+  async uploadByURI(uri: string, payload: CreateAttachmentDTO) {
+    const buffer = await this.getFile(uri);
+    const originalname = basename(new URL(uri).pathname);
+
+    return await this.upload(
+      { buffer, originalname } as Express.Multer.File,
+      payload,
     );
   }
 }

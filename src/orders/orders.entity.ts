@@ -15,10 +15,10 @@ export class OrderEntity extends BaseEntity {
   })
   paid: boolean;
 
-  @Column()
+  @Column({ type: 'float' })
   total: number;
 
-  @Column({ name: 'total_paid', default: 0 })
+  @Column({ name: 'total_paid', type: 'float', default: 0 })
   totalPaid: number = 0;
 
   @Column({ name: 'paid_date', nullable: true })

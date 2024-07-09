@@ -3,6 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { EntityManager, FindOptionsRelations, Repository } from 'typeorm';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
+import { StockEntity } from '@/stock/stock.entity';
 import { ProductVariationEntity } from './variations.entity';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
@@ -19,13 +20,33 @@ export class VariationsServices {
     payloads: Array<CreateProductVariationDTO>,
     tx?: EntityManager,
   ) {
-    const repository =
-      tx !== undefined
-        ? tx.getRepository(ProductVariationEntity)
-        : this.variationRepository;
+    const data = this.variationRepository.create(
+      payloads.map((payload) => ({ ...payload, productId })),
+    );
 
-    return await repository.save(
-      repository.create(payloads.map((payload) => ({ ...payload, productId }))),
+    async function createVariationsWithStock(tx: EntityManager) {
+      const variations = await tx
+        .getRepository(ProductVariationEntity)
+        .save(data);
+
+      const stockRepository = tx.getRepository(StockEntity);
+      await stockRepository.save(
+        stockRepository.create(
+          variations.map((variation) => ({
+            variationId: variation.id,
+            minQuantity: 5,
+            quantity: 0,
+          })),
+        ),
+      );
+
+      return variations;
+    }
+
+    if (tx) return await createVariationsWithStock(tx);
+
+    return await this.variationRepository.manager.transaction(
+      async (tx) => await createVariationsWithStock(tx),
     );
   }
 

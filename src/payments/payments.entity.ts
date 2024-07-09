@@ -6,7 +6,7 @@ import { ClientEntity } from '@/clients/clients.entity';
 
 @Entity({ name: 'payments' })
 export class PaymentEntity extends BaseEntityWithIdInt {
-  @Column()
+  @Column({ type: 'float' })
   value: number;
 
   @Column({

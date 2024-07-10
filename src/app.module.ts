@@ -1,36 +1,45 @@
 import { Module } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
-import { RavenInterceptor, RavenModule } from 'nest-raven';
+import { APP_GUARD } from '@nestjs/core';
 import { LoggerModule } from 'nestjs-pino';
-import { UsersModule } from './users/users.module';
+import {
+  databaseFactory,
+  loggerFactory,
+  authConfig,
+  databaseConfig,
+  sentryConfig,
+  serverConfig,
+  storageConfig,
+} from '@/config';
 import { AuthModule } from './auth/auth.module';
-import { BrandsModule } from './brands/brands.module';
 import { JwtAuthGuard } from './auth/guards/jwt.guard';
-import { ProductsModule } from './products/products.module';
-import { CategoriesModule } from './categories/categories.module';
+import { UsersModule } from './users/users.module';
 import { StockModule } from './stock/stock.module';
-import { AttachmentsModule } from './attachments/attachments.module';
-import { ClientsModule } from './clients/clients.module';
 import { OrdersModule } from './orders/orders.module';
-import { NODE_ENV } from './config/configuration';
-import { oracleConnectionConfig } from './config/data-source';
+import { BrandsModule } from './brands/brands.module';
+import { ClientsModule } from './clients/clients.module';
+import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
+import { CategoriesModule } from './categories/categories.module';
+import { AttachmentsModule } from './attachments/attachments.module';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
-    RavenModule,
-    LoggerModule.forRoot({
-      pinoHttp: {
-        level: NODE_ENV === 'production' ? 'info' : 'debug',
-        transport:
-          NODE_ENV === 'production' ? undefined : { target: 'pino-pretty' },
-      },
+    ConfigModule.forRoot({
+      cache: true,
+      isGlobal: true,
+      // eslint-disable-next-line prettier/prettier
+      load: [serverConfig, databaseConfig, authConfig, storageConfig, sentryConfig],
+      envFilePath: '.env',
+    }),
+    LoggerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: loggerFactory,
     }),
     TypeOrmModule.forRootAsync({
-      useFactory: oracleConnectionConfig,
+      inject: [ConfigService],
+      useFactory: databaseFactory,
     }),
     UsersModule,
     AuthModule,
@@ -44,10 +53,6 @@ import { PaymentsModule } from './payments/payments.module';
     PaymentsModule,
   ],
   providers: [
-    {
-      provide: APP_INTERCEPTOR,
-      useValue: new RavenInterceptor(),
-    },
     {
       provide: APP_GUARD,
       useClass: JwtAuthGuard,

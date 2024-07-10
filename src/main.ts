@@ -5,8 +5,9 @@ import { ValidationPipe } from '@nestjs/common';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';
 import { Logger } from 'nestjs-pino';
+import { GLOBAL_PREFIX, PORT, SENTRY_CONFIG } from '@/config/configuration';
+import { SentryInterceptor } from '@/shared/interceptors/sentry.interceptor';
 import { AppModule } from './app.module';
-import { GLOBAL_PREFIX, PORT, SENTRY_CONFIG } from './config/configuration';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, { bufferLogs: true });
@@ -21,11 +22,17 @@ async function bootstrap() {
     ],
     tracesSampleRate: 1.0,
     profilesSampleRate: 1.0,
+    ignoreErrors: [
+      'NotFoundException',
+      'BadRequestException',
+      'UnauthorizedException',
+    ],
   });
 
   app.useLogger(app.get(Logger));
   app.setGlobalPrefix(GLOBAL_PREFIX);
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new SentryInterceptor());
 
   await app.listen(PORT);
 }

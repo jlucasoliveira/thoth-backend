@@ -44,3 +44,4 @@ lerna-debug.log*
 .env
 oracle-certificates
 *.key*
+*.ignore.*

@@ -13,7 +13,7 @@ export function databaseFactory(
   const { nodeEnv } = configService.getOrThrow<ServerConfig>(ServerConfigToken);
   const config = configService.getOrThrow<DatabaseConfig>(DatabaseConfigToken);
 
-  const data: DataSourceOptions = {
+  return {
     type: 'oracle',
     username: config.username,
     password: config.password,
@@ -31,8 +31,4 @@ export function databaseFactory(
       configDir: config.walletPath,
     },
   };
-
-  console.log(data);
-
-  return data;
 }

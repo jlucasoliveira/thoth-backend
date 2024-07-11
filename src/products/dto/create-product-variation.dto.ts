@@ -32,4 +32,12 @@ export class CreateProductVariationDTO {
   @IsOptional()
   @Length(0, 20)
   barCode?: string;
+
+  @IsNumber()
+  @IsOptional()
+  quantity?: number;
+
+  @IsNumber()
+  @IsOptional()
+  costPrice?: number;
 }

@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { User } from '@/auth/guards/user.decorator';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
@@ -30,16 +31,20 @@ export class ProductsController {
   ) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productsService.create(createProductDto);
+  create(
+    @User() user: Express.User,
+    @Body() createProductDto: CreateProductDto,
+  ) {
+    return this.productsService.create(user, createProductDto);
   }
 
   @Post(':productId/variations')
   createVariation(
+    @User() user: Express.User,
     @Param('productId', ParseIntPipe) productId: number,
     @Body() payload: CreateProductVariationDTO,
   ) {
-    return this.variationsService.create(productId, [payload]);
+    return this.variationsService.create(user, productId, [payload]);
   }
 
   @Get()

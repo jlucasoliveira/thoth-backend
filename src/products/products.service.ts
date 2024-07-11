@@ -20,7 +20,7 @@ export class ProductsService {
     private readonly variationsService: VariationsServices,
   ) {}
 
-  async create(createProductDto: CreateProductDto) {
+  async create(user: Express.User, createProductDto: CreateProductDto) {
     const { variations, ...data } = createProductDto;
     await this.brandsService.findOne(data.brandId);
     await this.categoriesService.findOne(data.categoryId);
@@ -30,7 +30,7 @@ export class ProductsService {
       const product = await repository.save(repository.create(data));
 
       if (variations?.length)
-        await this.variationsService.create(product.id, variations, tx);
+        await this.variationsService.create(user, product.id, variations, tx);
 
       return product;
     });

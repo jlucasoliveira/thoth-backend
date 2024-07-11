@@ -10,8 +10,13 @@ import {
   Delete,
   Patch,
 } from '@nestjs/common';
+import { FindOptionsRelations } from 'typeorm';
+import {
+  FilterPipe,
+  IncludePipe,
+  SortPipe,
+} from '@/shared/pagination/filters.pipe';
 import { User } from '@/auth/guards/user.decorator';
-import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { StockEntryEntity } from './stock-entries.entity';
@@ -56,12 +61,15 @@ export class StockController {
     @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<StockEntryEntity>,
   ) {
     return this.stockService.findByProductId(variationId, {
       where,
       order,
       skip,
       take,
+      relations,
     });
   }
 
@@ -72,8 +80,16 @@ export class StockController {
     @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<StockEntryEntity>,
   ) {
-    return this.stockService.findAllEntries(id, { where, order, skip, take });
+    return this.stockService.findAllEntries(id, {
+      where,
+      order,
+      skip,
+      take,
+      relations,
+    });
   }
 
   @Get(':id')

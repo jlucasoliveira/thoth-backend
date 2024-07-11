@@ -1,11 +1,6 @@
-import {
-  DeepPartial,
-  EntityManager,
-  FindOptionsRelations,
-  Repository,
-} from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { DeepPartial, EntityManager, Repository } from 'typeorm';
 import { StockKind } from '@/stock/constants';
 import { BrandEntity } from '@/brands/brands.entity';
 import { StockEntity } from '@/stock/stock.entity';
@@ -119,14 +114,8 @@ export class VariationsServices {
     );
   }
 
-  async findAll(
-    params: PageOptions<ProductVariationEntity>,
-    relations?: FindOptionsRelations<ProductVariationEntity>,
-  ) {
-    const [data, total] = await this.variationRepository.findAndCount({
-      ...params,
-      relations,
-    });
+  async findAll(params: PageOptions<ProductVariationEntity>) {
+    const [data, total] = await this.variationRepository.findAndCount(params);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 

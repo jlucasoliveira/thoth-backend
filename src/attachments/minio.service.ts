@@ -1,7 +1,8 @@
-import { Client } from 'minio';
 import { extname, join } from 'node:path';
+import { Client } from 'minio';
 import { Inject, Injectable } from '@nestjs/common';
-import { MINIO_CONFIG } from '@/config/configuration';
+import { ConfigService } from '@nestjs/config';
+import { StorageConfig, StorageConfigToken } from '@/config';
 import { AttachmentEntity } from './attachments.entity';
 import { MINIO_PROVIDER } from './minio.provider';
 
@@ -15,15 +16,14 @@ export class MinIOService {
   constructor(
     @Inject(MINIO_PROVIDER)
     private readonly minio: Client,
+    private readonly configService: ConfigService,
   ) {}
 
   async getSignedURL(key: string) {
-    return await this.minio.presignedUrl(
-      'GET',
-      MINIO_CONFIG.bucket,
-      key,
-      MINIO_CONFIG.signed.expires,
-    );
+    const { bucket, signed } =
+      this.configService.getOrThrow<StorageConfig>(StorageConfigToken);
+
+    return await this.minio.presignedUrl('GET', bucket, key, signed.expires);
   }
 
   createFolderName(resource: string, folder: string, filename?: string) {
@@ -57,6 +57,9 @@ export class MinIOService {
     resource = 'content',
     sfx?: string,
   ) {
+    const { bucket } =
+      this.configService.getOrThrow<StorageConfig>(StorageConfigToken);
+
     const { filename: name, basename } = this.uniqueFilename(
       attachment,
       filename,
@@ -64,12 +67,15 @@ export class MinIOService {
     );
     const path = this.createFolderName(resource, basename, name);
 
-    await this.minio.putObject(MINIO_CONFIG.bucket, path, file);
+    await this.minio.putObject(bucket, path, file);
 
     return path;
   }
 
   async deleteFiles(keys: string[]) {
-    return await this.minio.removeObjects(MINIO_CONFIG.bucket, keys);
+    const { bucket } =
+      this.configService.getOrThrow<StorageConfig>(StorageConfigToken);
+
+    return await this.minio.removeObjects(bucket, keys);
   }
 }

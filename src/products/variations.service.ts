@@ -1,12 +1,26 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { EntityManager, FindOptionsRelations, Repository } from 'typeorm';
+import { DeepPartial, EntityManager, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
+import { StockKind } from '@/stock/constants';
+import { BrandEntity } from '@/brands/brands.entity';
+import { StockEntity } from '@/stock/stock.entity';
+import { StockEntryEntity } from '@/stock/stock-entries.entity';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
-import { StockEntity } from '@/stock/stock.entity';
-import { ProductVariationEntity } from './variations.entity';
+import { calcReversePercentage } from '@/utils/calculator';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
+import { ProductVariationEntity } from './variations.entity';
+
+type StockData = {
+  quantity: number | undefined;
+  costPrice: number | undefined;
+};
+
+type VariationData = Pick<StockData, 'costPrice'> & {
+  price: number;
+};
 
 @Injectable()
 export class VariationsServices {
@@ -15,7 +29,8 @@ export class VariationsServices {
     private readonly variationRepository: Repository<ProductVariationEntity>,
   ) {}
 
-  async create(
+  async _create(
+    user: Express.User,
     productId: number,
     payloads: Array<CreateProductVariationDTO>,
     tx?: EntityManager,
@@ -23,41 +38,90 @@ export class VariationsServices {
     const data = this.variationRepository.create(
       payloads.map((payload) => ({ ...payload, productId })),
     );
+    const variationPrices = new Map<string, VariationData>();
+    const stocksData = new Map<string, StockData>(
+      payloads.map(({ externalCode, quantity, costPrice }) => [
+        externalCode,
+        { quantity, costPrice },
+      ]),
+    );
 
-    async function createVariationsWithStock(tx: EntityManager) {
-      const variations = await tx
-        .getRepository(ProductVariationEntity)
-        .save(data);
+    const variations = await tx
+      .getRepository(ProductVariationEntity)
+      .save(data);
 
-      const stockRepository = tx.getRepository(StockEntity);
-      await stockRepository.save(
-        stockRepository.create(
-          variations.map((variation) => ({
-            variationId: variation.id,
-            minQuantity: 5,
-            quantity: 0,
-          })),
-        ),
-      );
+    const stocksPayload: DeepPartial<StockEntity>[] = [];
 
-      return variations;
-    }
+    variations.forEach((variation) => {
+      const data = stocksData.get(variation.externalCode);
+      variationPrices.set(variation.id, {
+        price: variation.price,
+        costPrice: data.costPrice,
+      });
 
-    if (tx) return await createVariationsWithStock(tx);
+      stocksPayload.push({
+        variationId: variation.id,
+        minQuantity: 5,
+        quantity: data?.quantity ?? 0,
+      });
+    });
+
+    const stockRepository = tx.getRepository(StockEntity);
+    const stocks = await stockRepository.save(
+      stockRepository.create(stocksPayload),
+    );
+
+    const brand = await tx.getRepository(BrandEntity).findOne({
+      select: ['id', 'profitRate'],
+      where: { products: { id: productId } },
+    });
+
+    const stockEntries: QueryDeepPartialEntity<StockEntryEntity>[] = [];
+
+    stocks.forEach((stock) => {
+      if (stock.quantity > 0) {
+        const prices = variationPrices.get(stock.variationId);
+        const constPriceValue =
+          prices?.costPrice ??
+          calcReversePercentage({
+            percentage: brand?.profitRate ?? 0,
+            total: prices?.price ?? 0,
+          });
+
+        const payload = {
+          userId: user.id,
+          stockId: stock.id,
+          kind: StockKind.ENTRY,
+          amount: stock.quantity,
+          costPrice: constPriceValue,
+          entryDate: () => `CURRENT_TIMESTAMP`,
+          expirationDate: () => `ADD_MONTHS(CURRENT_TIMESTAMP, 12)`,
+        };
+
+        stockEntries.push(payload);
+      }
+    });
+
+    await tx.getRepository(StockEntryEntity).insert(stockEntries);
+
+    return variations;
+  }
+
+  async create(
+    user: Express.User,
+    productId: number,
+    payloads: Array<CreateProductVariationDTO>,
+    tx?: EntityManager,
+  ) {
+    if (tx) return await this._create(user, productId, payloads, tx);
 
     return await this.variationRepository.manager.transaction(
-      async (tx) => await createVariationsWithStock(tx),
+      async (tx) => await this._create(user, productId, payloads, tx),
     );
   }
 
-  async findAll(
-    params: PageOptions<ProductVariationEntity>,
-    relations?: FindOptionsRelations<ProductVariationEntity>,
-  ) {
-    const [data, total] = await this.variationRepository.findAndCount({
-      ...params,
-      relations,
-    });
+  async findAll(params: PageOptions<ProductVariationEntity>) {
+    const [data, total] = await this.variationRepository.findAndCount(params);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 

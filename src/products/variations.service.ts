@@ -1,6 +1,7 @@
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { DeepPartial, EntityManager, Repository } from 'typeorm';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { StockKind } from '@/stock/constants';
 import { BrandEntity } from '@/brands/brands.entity';
 import { StockEntity } from '@/stock/stock.entity';
@@ -75,28 +76,33 @@ export class VariationsServices {
       where: { products: { id: productId } },
     });
 
-    const stockEntryRepository = tx.getRepository(StockEntryEntity);
-    await stockEntryRepository.insert(
-      stocks.map((stock) => {
-        const { costPrice, price } = variationPrices.get(stock.variationId);
+    const stockEntries: QueryDeepPartialEntity<StockEntryEntity>[] = [];
+
+    stocks.forEach((stock) => {
+      if (stock.quantity > 0) {
+        const prices = variationPrices.get(stock.variationId);
         const constPriceValue =
-          costPrice ??
+          prices?.costPrice ??
           calcReversePercentage({
             percentage: brand?.profitRate ?? 0,
-            total: price,
+            total: prices?.price ?? 0,
           });
 
-        return {
+        const payload = {
           userId: user.id,
           stockId: stock.id,
           kind: StockKind.ENTRY,
           amount: stock.quantity,
+          costPrice: constPriceValue,
           entryDate: () => `CURRENT_TIMESTAMP`,
           expirationDate: () => `ADD_MONTHS(CURRENT_TIMESTAMP, 12)`,
-          costPrice: constPriceValue,
         };
-      }),
-    );
+
+        stockEntries.push(payload);
+      }
+    });
+
+    await tx.getRepository(StockEntryEntity).insert(stockEntries);
 
     return variations;
   }

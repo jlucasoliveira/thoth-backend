@@ -6,13 +6,13 @@ import { UserEntity } from '@/users/users.entity';
 
 @Entity({ name: 'stock_entries' })
 export class StockEntryEntity extends BaseEntity {
-  @Column({ name: 'entry_date' })
+  @Column({ name: 'entry_date', type: 'timestamp' })
   entryDate: Date;
 
   @Column({ name: 'cost_price', type: 'float' })
   costPrice: number;
 
-  @Column({ name: 'expiration_date' })
+  @Column({ name: 'expiration_date', type: 'timestamp' })
   expirationDate: Date;
 
   @Column()

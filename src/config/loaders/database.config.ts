@@ -24,7 +24,7 @@ export const databaseConfig = registerAs<DatabaseConfig>(
     isDebug: process.env.DB_LOG_QUERY === 'true',
     host: process.env.DB_HOST,
     port: asInt(process.env.DB_PORT, 1521),
-    database: process.env.DB_DATABASE,
+    database: process.env.DB_NAME,
     username: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     connectString: process.env.DB_CONNECT_STRING,

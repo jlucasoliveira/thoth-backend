@@ -17,7 +17,7 @@ export class ProductVariationEntity extends BaseEntity {
   @Column({ length: 60, nullable: true })
   variation?: string;
 
-  @Column({ length: 15, name: 'external_code' })
+  @Column({ length: 15, name: 'external_code', unique: true })
   externalCode: string;
 
   @Column({ length: 20, name: 'bar_code', nullable: true })

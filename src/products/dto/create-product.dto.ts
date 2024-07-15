@@ -1,4 +1,5 @@
 import {
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -19,13 +20,18 @@ export class CreateProductDto {
 
   @IsNumber()
   @Min(0)
-  weight: number;
+  @IsOptional()
+  weight?: number;
 
   @IsNumber()
   brandId: number;
 
-  @IsNumber()
-  categoryId: number;
+  @IsArray()
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false, maxDecimalPlaces: 0 },
+    { each: true },
+  )
+  categories: number[];
 
   @IsEnum(Object.values(Gender))
   @IsNotEmpty()
@@ -33,7 +39,8 @@ export class CreateProductDto {
 
   @IsNumber()
   @Min(0)
-  volume: number;
+  @IsOptional()
+  volume?: number;
 
   @IsObject({ each: true })
   @IsOptional()

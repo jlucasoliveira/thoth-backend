@@ -1,8 +1,16 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
-import { CategoryEntity } from '@/categories/categories.entity';
-import { BrandEntity } from '@/brands/brands.entity';
-import { BaseEntityWithIdInt as BaseEntity } from '@/types/typeorm/base-entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Gender } from '@/types/gender';
+import { BaseEntityWithIdInt as BaseEntity } from '@/types/typeorm/base-entity';
+import { BrandEntity } from '@/brands/brands.entity';
+import { CategoryEntity } from '@/categories/categories.entity';
 import { ProductVariationEntity } from './variations.entity';
 
 @Entity({ name: 'products', orderBy: { name: 'ASC' } })
@@ -28,14 +36,23 @@ export class ProductEntity extends BaseEntity {
   @JoinColumn({ name: 'brand_id' })
   brand: BrandEntity;
 
-  @Column({ type: 'number', name: 'category_id' })
-  categoryId: number;
-
-  @ManyToOne(() => CategoryEntity, (category) => category.products, {
+  @ManyToMany(() => CategoryEntity, (category) => category.products, {
     onDelete: 'NO ACTION',
   })
-  @JoinColumn({ name: 'category_id' })
-  category: CategoryEntity;
+  @JoinTable({
+    name: 'categories_products',
+    joinColumn: {
+      name: 'product_id',
+      referencedColumnName: 'id',
+      foreignKeyConstraintName: 'FK_categories_on_products',
+    },
+    inverseJoinColumn: {
+      name: 'category_id',
+      referencedColumnName: 'id',
+      foreignKeyConstraintName: 'FK_products_on_categories',
+    },
+  })
+  categories: CategoryEntity[];
 
   @OneToMany(() => ProductVariationEntity, (variation) => variation.product)
   variations: ProductVariationEntity[];

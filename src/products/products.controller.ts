@@ -77,6 +77,8 @@ export class ProductsController {
     @Query('sort', SortPipe) order: OrderBy<ProductVariationEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<ProductVariationEntity>,
   ) {
     where.productId = productId;
     return this.variationsService.findAll({
@@ -84,6 +86,7 @@ export class ProductsController {
       skip,
       take,
       where,
+      relations,
     });
   }
 

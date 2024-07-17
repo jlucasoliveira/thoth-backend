@@ -1,4 +1,6 @@
 import {
+  IsArray,
+  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsOptional,
@@ -7,6 +9,7 @@ import {
   Length,
   Min,
 } from 'class-validator';
+import { Gender } from '@/types/gender';
 
 export class CreateProductVariationDTO {
   @IsString()
@@ -18,6 +21,20 @@ export class CreateProductVariationDTO {
   @IsNotEmpty()
   @Length(0, 15)
   externalCode: string;
+
+  @IsEnum(Object.values(Gender))
+  @IsNotEmpty()
+  gender: Gender;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  weight?: number;
+
+  @IsNumber()
+  @Min(0)
+  @IsOptional()
+  volume?: number;
 
   @IsNumber()
   @Min(0)
@@ -40,4 +57,11 @@ export class CreateProductVariationDTO {
   @IsNumber()
   @IsOptional()
   costPrice?: number;
+
+  @IsArray()
+  @IsNumber(
+    { allowInfinity: false, allowNaN: false, maxDecimalPlaces: 0 },
+    { each: true },
+  )
+  categories: number[];
 }

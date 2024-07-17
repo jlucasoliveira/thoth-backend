@@ -1,12 +1,12 @@
 import { Column, Entity, ManyToMany } from 'typeorm';
 import { BaseEntityWithIdInt as BaseEntity } from '@/types/typeorm/base-entity';
-import { ProductEntity } from '@/products/products.entity';
+import { ProductVariationEntity } from '@/products/variations.entity';
 
 @Entity({ name: 'categories' })
 export class CategoryEntity extends BaseEntity {
   @Column({ length: 30 })
   name: string;
 
-  @ManyToMany(() => ProductEntity, (product) => product.categories)
-  products: ProductEntity[];
+  @ManyToMany(() => ProductVariationEntity, (variation) => variation.categories)
+  variations: ProductVariationEntity[];
 }

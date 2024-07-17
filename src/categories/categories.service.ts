@@ -45,17 +45,17 @@ export class CategoriesService {
     return data;
   }
 
-  async updateProductCategories(ids: number[], productId: number) {
+  async updateProductCategories(ids: number[], variationId: string) {
     await this.validateExistence(ids);
     const categories = await this.categoryRepository.find({
-      where: { products: { id: productId } },
+      where: { variations: { id: variationId } },
       select: ['id'],
     });
 
     const dataSet = new Set<number>(categories.map(({ id }) => id));
 
     const toAdd = ids.reduce((acc, id) => {
-      if (!dataSet.has(id)) acc.push({ productId, categoryId: id });
+      if (!dataSet.has(id)) acc.push({ variationId, categoryId: id });
       return acc;
     }, []);
 
@@ -65,7 +65,7 @@ export class CategoriesService {
     }, []);
 
     await this.categoryProductRepository.delete({
-      productId,
+      variationId,
       categoryId: In(toRemove),
     });
     await this.categoryProductRepository.insert(toAdd);

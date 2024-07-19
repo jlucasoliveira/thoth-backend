@@ -2,7 +2,6 @@ import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { BrandsService } from '@/brands/brands.service';
-import { CategoriesService } from '@/categories/categories.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { ProductEntity } from './products.entity';
@@ -16,14 +15,12 @@ export class ProductsService {
     @InjectRepository(ProductEntity)
     private readonly productRepository: Repository<ProductEntity>,
     private readonly brandsService: BrandsService,
-    private readonly categoriesService: CategoriesService,
     private readonly variationsService: VariationsServices,
   ) {}
 
   async create(user: Express.User, createProductDto: CreateProductDto) {
     const { variations, ...data } = createProductDto;
     await this.brandsService.findOne(data.brandId);
-    await this.categoriesService.findOne(data.categoryId);
 
     return await this.productRepository.manager.transaction(async (tx) => {
       const repository = tx.getRepository(ProductEntity);
@@ -62,13 +59,6 @@ export class ProductsService {
       product.brandId !== updateProductDto.brandId
     ) {
       await this.brandsService.findOne(updateProductDto.brandId);
-    }
-
-    if (
-      updateProductDto.categoryId &&
-      updateProductDto.categoryId !== product.categoryId
-    ) {
-      await this.categoriesService.findOne(updateProductDto.categoryId);
     }
 
     await this.productRepository.update(id, updateProductDto);

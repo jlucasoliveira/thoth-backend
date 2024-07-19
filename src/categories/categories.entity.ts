@@ -4,7 +4,7 @@ import { ProductVariationEntity } from '@/products/variations.entity';
 
 @Entity({ name: 'categories' })
 export class CategoryEntity extends BaseEntity {
-  @Column({ length: 30 })
+  @Column({ length: 60 })
   name: string;
 
   @ManyToMany(() => ProductVariationEntity, (variation) => variation.categories)

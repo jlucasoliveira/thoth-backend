@@ -22,9 +22,9 @@ export type WhereClause<T> = {
 export type OrderBy<Entity> = Record<keyof Entity, 'asc' | 'desc'>;
 
 export type PageOptions<Entity> = {
-  take: number;
-  skip: number;
-  order: OrderBy<Entity>;
+  take?: number;
+  skip?: number;
+  order?: OrderBy<Entity>;
   where: WhereClause<Entity>;
   relations?: FindOptionsRelations<Entity>;
 };

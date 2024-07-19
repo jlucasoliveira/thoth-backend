@@ -1,8 +1,8 @@
 type Props = {
   itens: number;
   total: number;
-  take: number;
-  skip: number;
+  take?: number;
+  skip?: number;
 };
 
 export class PageMetaDto {
@@ -21,11 +21,12 @@ export class PageMetaDto {
   readonly hasNextPage: boolean;
 
   constructor(props: Props) {
+    const take = props.take ?? props.total;
     this.itens = props.itens;
     this.total = props.total;
-    this.limit = Number(props.take || 10);
-    this.page = Number(props.skip / props.take || 1);
-    this.pages = Math.ceil(this.total / props.take);
+    this.limit = Number(take || 10);
+    this.page = Number((props.skip ?? 0) / take || 1);
+    this.pages = Math.ceil(this.total / take);
     this.hasPreviousPage = this.page > 1;
     this.hasNextPage = this.page < this.pages;
   }

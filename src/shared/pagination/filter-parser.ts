@@ -15,17 +15,33 @@ import {
 import { Filter, FilterOperator } from './pageOptions.dto';
 import { WhereClause } from './filters';
 
+const labelConverter = ['string', 'number', 'date'] as const;
+type LabelConverter = (typeof labelConverter)[number];
+
 export class FilterParser<T> {
   private query: WhereClause<T>;
 
   convert(input: any): any {
+    if (Array.isArray(input)) return input.map((value) => this.convert(value));
+
+    if (typeof input === 'string') {
+      const [value, caster] = input.split(':');
+
+      if (
+        caster !== undefined &&
+        labelConverter.includes(caster as LabelConverter)
+      ) {
+        if (caster === 'string') return value.toString();
+        else if (caster === 'number') return Number(value);
+        else if (caster === 'date') return new Date(value);
+      }
+    }
+
     const number = Number(input);
     if (!isNaN(number)) return number;
 
-    const inDate = new Date(input);
-    if (inDate.toString() !== 'Invalid Date') return inDate;
-
-    if (Array.isArray(input)) return input.map((value) => this.convert(value));
+    const asDate = new Date(input);
+    if (asDate.toString() !== 'Invalid Date') return asDate;
 
     return input;
   }
@@ -43,11 +59,11 @@ export class FilterParser<T> {
   }
 
   createContains(value: T[keyof T]) {
-    return Like(this.convert(value));
+    return Like(`%${this.convert(value)}%`);
   }
 
   createInsensitiveContains(value: T[keyof T]) {
-    return ILike(this.convert(value));
+    return ILike(`%${this.convert(value)}%`);
   }
 
   createGreaterThanEqual(value: T[keyof T]) {

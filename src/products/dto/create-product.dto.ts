@@ -1,15 +1,12 @@
 import {
-  IsEnum,
   IsNotEmpty,
   IsNumber,
   IsObject,
   IsOptional,
   IsString,
   Length,
-  Min,
 } from 'class-validator';
 import { CreateProductVariationDTO } from './create-product-variation.dto';
-import { Gender } from '@/types/gender';
 
 export class CreateProductDto {
   @IsString()
@@ -18,22 +15,7 @@ export class CreateProductDto {
   name: string;
 
   @IsNumber()
-  @Min(0)
-  weight: number;
-
-  @IsNumber()
   brandId: number;
-
-  @IsNumber()
-  categoryId: number;
-
-  @IsEnum(Object.values(Gender))
-  @IsNotEmpty()
-  gender: Gender;
-
-  @IsNumber()
-  @Min(0)
-  volume: number;
 
   @IsObject({ each: true })
   @IsOptional()

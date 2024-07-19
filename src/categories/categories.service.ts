@@ -1,9 +1,10 @@
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { CategoryEntity } from './categories.entity';
+import { ProductCategoryEntity } from './products-categories.entity';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -12,6 +13,8 @@ export class CategoriesService {
   constructor(
     @InjectRepository(CategoryEntity)
     private readonly categoryRepository: Repository<CategoryEntity>,
+    @InjectRepository(ProductCategoryEntity)
+    private readonly categoryProductRepository: Repository<ProductCategoryEntity>,
   ) {}
 
   async create(createCategoryDto: CreateCategoryDto) {
@@ -26,6 +29,46 @@ export class CategoriesService {
     const meta = new PageMetaDto({ itens: data.length, total, ...props });
 
     return { data, meta };
+  }
+
+  async validateExistence(ids: number[]) {
+    const { data } = await this.findAll({
+      where: { id: In(ids) },
+    });
+    const foundedIds = data.map(({ id }) => id);
+
+    for (const id of ids) {
+      if (!foundedIds.includes(id))
+        throw new NotFoundException(`Categoria com id ${id} não encontrada.`);
+    }
+
+    return data;
+  }
+
+  async updateProductCategories(ids: number[], variationId: string) {
+    await this.validateExistence(ids);
+    const categories = await this.categoryRepository.find({
+      where: { variations: { id: variationId } },
+      select: ['id'],
+    });
+
+    const dataSet = new Set<number>(categories.map(({ id }) => id));
+
+    const toAdd = ids.reduce((acc, id) => {
+      if (!dataSet.has(id)) acc.push({ variationId, categoryId: id });
+      return acc;
+    }, []);
+
+    const toRemove: number[] = categories.reduce((acc, category) => {
+      if (!ids.includes(category.id)) acc.push(category.id);
+      return acc;
+    }, []);
+
+    await this.categoryProductRepository.delete({
+      variationId,
+      categoryId: In(toRemove),
+    });
+    await this.categoryProductRepository.insert(toAdd);
   }
 
   async findOne(id: number) {

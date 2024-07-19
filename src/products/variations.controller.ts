@@ -33,7 +33,11 @@ export class VariationsController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.variationsService.findOne(id);
+  findOne(
+    @Param('id') id: string,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<ProductVariationEntity>,
+  ) {
+    return this.variationsService.findOne(id, undefined, relations);
   }
 }

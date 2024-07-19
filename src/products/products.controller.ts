@@ -13,7 +13,11 @@ import {
 import { User } from '@/auth/guards/user.decorator';
 import { OrderBy } from '@/shared/pagination/filters';
 import { Filter } from '@/shared/pagination/pageOptions.dto';
-import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import {
+  FilterPipe,
+  IncludePipe,
+  SortPipe,
+} from '@/shared/pagination/filters.pipe';
 import { ProductsService } from './products.service';
 import { VariationsServices } from './variations.service';
 import { ProductEntity } from './products.entity';
@@ -22,6 +26,7 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
+import { FindOptionsRelations } from 'typeorm';
 
 @Controller('products')
 export class ProductsController {
@@ -53,8 +58,16 @@ export class ProductsController {
     @Query('sort', SortPipe) order: OrderBy<ProductEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<ProductVariationEntity>,
   ) {
-    return this.productsService.findAll({ order, skip, take, where });
+    return this.productsService.findAll({
+      order,
+      skip,
+      take,
+      where,
+      relations,
+    });
   }
 
   @Get(':productId/variations')
@@ -64,6 +77,8 @@ export class ProductsController {
     @Query('sort', SortPipe) order: OrderBy<ProductVariationEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<ProductVariationEntity>,
   ) {
     where.productId = productId;
     return this.variationsService.findAll({
@@ -71,6 +86,7 @@ export class ProductsController {
       skip,
       take,
       where,
+      relations,
     });
   }
 

@@ -5,7 +5,9 @@ import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity
 import { StockKind } from '@/stock/constants';
 import { BrandEntity } from '@/brands/brands.entity';
 import { StockEntity } from '@/stock/stock.entity';
+import { CategoryEntity } from '@/categories/categories.entity';
 import { StockEntryEntity } from '@/stock/stock-entries.entity';
+import { CategoriesService } from '@/categories/categories.service';
 import { PageOptions } from '@/shared/pagination/filters';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { calcReversePercentage } from '@/utils/calculator';
@@ -27,6 +29,7 @@ export class VariationsServices {
   constructor(
     @InjectRepository(ProductVariationEntity)
     private readonly variationRepository: Repository<ProductVariationEntity>,
+    private readonly categoriesService: CategoriesService,
   ) {}
 
   async _create(
@@ -35,8 +38,20 @@ export class VariationsServices {
     payloads: Array<CreateProductVariationDTO>,
     tx?: EntityManager,
   ) {
+    const categories = await this.categoriesService.validateExistence(
+      payloads.flatMap((payload) => payload.categories),
+    );
+    const categoriesMap = new Map<number, CategoryEntity>(
+      categories.map((category) => [category.id, category]),
+    );
     const data = this.variationRepository.create(
-      payloads.map((payload) => ({ ...payload, productId })),
+      payloads.map(({ categories, ...payload }) => {
+        return {
+          ...payload,
+          productId,
+          categories: categories.map((id) => categoriesMap.get(id)),
+        };
+      }),
     );
     const variationPrices = new Map<string, VariationData>();
     const stocksData = new Map<string, StockData>(
@@ -128,9 +143,14 @@ export class VariationsServices {
     return { data, meta };
   }
 
-  async findOne(id: string, productId?: number) {
+  async findOne(
+    id: string,
+    productId?: number,
+    relations?: PageOptions<ProductVariationEntity>['relations'],
+  ) {
     const variation = await this.variationRepository.findOne({
       where: { id, productId },
+      relations,
     });
 
     if (!variation) throw new NotFoundException('Variação não encontrada');
@@ -140,10 +160,13 @@ export class VariationsServices {
 
   async update(
     id: string,
-    payload: UpdateProductVariationDTO,
+    { categories, ...payload }: UpdateProductVariationDTO,
     productId?: number,
   ) {
     await this.findOne(id, productId);
+
+    if (categories && categories.length > 0)
+      await this.categoriesService.updateProductCategories(categories, id);
 
     await this.variationRepository.update(id, payload);
 

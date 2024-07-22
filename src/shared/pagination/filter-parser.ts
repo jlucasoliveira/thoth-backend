@@ -2,6 +2,7 @@ import {
   And,
   Between,
   Equal,
+  FindOptionsWhere,
   ILike,
   In,
   LessThan,
@@ -13,13 +14,12 @@ import {
   Or,
 } from 'typeorm';
 import { Filter, FilterOperator } from './pageOptions.dto';
-import { WhereClause } from './filters';
 
 const labelConverter = ['string', 'number', 'date'] as const;
 type LabelConverter = (typeof labelConverter)[number];
 
 export class FilterParser<T> {
-  private query: WhereClause<T>;
+  private query: FindOptionsWhere<T> | Array<FindOptionsWhere<T>>;
 
   convert(input: any): any {
     if (Array.isArray(input)) return input.map((value) => this.convert(value));
@@ -47,7 +47,7 @@ export class FilterParser<T> {
   }
 
   constructor(private readonly filter?: Filter<T>) {
-    this.query = {};
+    this.query = [];
   }
 
   createEquals(value: T[keyof T]) {
@@ -138,18 +138,29 @@ export class FilterParser<T> {
     return parser;
   }
 
-  generateQuery(): WhereClause<T> {
-    if (this.filter) {
-      Object.entries(this.filter).forEach(([attr, filter]) => {
-        const [key, value] = Object.entries(filter)[0];
-        const parser = this.parserFactory(
-          key as keyof FilterOperator<T[keyof T]>,
-        );
+  private buildQuery(filter: FilterOperator<T>): FindOptionsWhere<T> {
+    const whereEntries = Object.entries(filter).map(([attr, filter]) => {
+      const [key, value] = Object.entries(filter)[0];
+      const parser = this.parserFactory(
+        key as keyof FilterOperator<T[keyof T]>,
+      );
 
-        this.query[attr] = parser
-          ? parser(value as any)
-          : this.createNestedQuery({ [key]: value } as Filter<T[keyof T]>);
-      });
+      const result = parser
+        ? parser(value as any)
+        : this.createNestedQuery({ [key]: value } as Filter<T[keyof T]>);
+
+      return [attr, result];
+    });
+
+    return Object.fromEntries(whereEntries);
+  }
+
+  generateQuery(): FindOptionsWhere<T> | Array<FindOptionsWhere<T>> {
+    if (Array.isArray(this.filter)) {
+      if (this.filter.length > 0)
+        this.query = this.filter.map((filter) => this.buildQuery(filter));
+    } else if (this.filter) {
+      this.query = this.buildQuery(this.filter);
     }
 
     return this.query;

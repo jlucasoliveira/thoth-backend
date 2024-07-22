@@ -9,8 +9,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { FindOptionsWhere } from 'typeorm';
 import { OrderBy } from '@/shared/pagination/filters';
-import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { BrandEntity } from './brands.entity';
 import { BrandsService } from './brands.service';
@@ -23,7 +23,7 @@ export class BrandsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<BrandEntity>,
+    @Query('filter', FilterPipe) where: FindOptionsWhere<BrandEntity>,
     @Query('sort', SortPipe) order: OrderBy<BrandEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

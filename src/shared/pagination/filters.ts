@@ -1,4 +1,4 @@
-import { FindOptionsRelations } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere } from 'typeorm';
 
 type QueryKey =
   | 'equals'
@@ -25,6 +25,6 @@ export type PageOptions<Entity> = {
   take?: number;
   skip?: number;
   order?: OrderBy<Entity>;
-  where: WhereClause<Entity>;
+  where: FindOptionsWhere<Entity>;
   relations?: FindOptionsRelations<Entity>;
 };

@@ -8,8 +8,8 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
+import { FindOptionsWhere } from 'typeorm';
 import { User } from '@/auth/guards/user.decorator';
-import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { OrderBy } from '@/shared/pagination/filters';
 import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
 import { PaymentEntity } from './payments.entity';
@@ -27,7 +27,7 @@ export class PaymentsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<PaymentEntity>,
+    @Query('filter', FilterPipe) where: FindOptionsWhere<PaymentEntity>,
     @Query('sort', SortPipe) order: OrderBy<PaymentEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

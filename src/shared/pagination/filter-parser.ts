@@ -13,6 +13,7 @@ import {
   Not,
   Or,
 } from 'typeorm';
+import { BadRequestException } from '@nestjs/common';
 import { Filter, FilterOperator } from './pageOptions.dto';
 
 const labelConverter = ['string', 'number', 'date'] as const;
@@ -20,6 +21,22 @@ type LabelConverter = (typeof labelConverter)[number];
 
 export class FilterParser<T> {
   private query: FindOptionsWhere<T> | Array<FindOptionsWhere<T>>;
+
+  asNumber(input: any, asTarget = false) {
+    const number = Number(input);
+    if (isNaN(number) && !asTarget)
+      throw new BadRequestException(`${input} is not a number`);
+
+    return number;
+  }
+
+  asDate(input: any, asTarget = false) {
+    const asDate = new Date(input);
+    if (asDate.toString() === 'Invalid Date' && !asTarget)
+      throw new BadRequestException(`${input} is a invalid date format`);
+
+    return asDate;
+  }
 
   convert(input: any): any {
     if (Array.isArray(input)) return input.map((value) => this.convert(value));
@@ -32,8 +49,8 @@ export class FilterParser<T> {
         labelConverter.includes(caster as LabelConverter)
       ) {
         if (caster === 'string') return value.toString();
-        else if (caster === 'number') return Number(value);
-        else if (caster === 'date') return new Date(value);
+        else if (caster === 'number') return this.asNumber(value);
+        else if (caster === 'date') return this.asDate(value);
       }
     }
 

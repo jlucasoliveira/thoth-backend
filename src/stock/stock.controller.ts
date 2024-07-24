@@ -10,7 +10,7 @@ import {
   Delete,
   Patch,
 } from '@nestjs/common';
-import { FindOptionsRelations } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere } from 'typeorm';
 import {
   FilterPipe,
   IncludePipe,
@@ -57,7 +57,7 @@ export class StockController {
   @Get('entries')
   findAllByProductId(
     @Param('variationId', ParseUUIDPipe) variationId: string,
-    @Query('filter', FilterPipe) where: Filter<StockEntryEntity>,
+    @Query('filter', FilterPipe) where: FindOptionsWhere<StockEntryEntity>,
     @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
@@ -76,7 +76,7 @@ export class StockController {
   @Get(':id/entries')
   findAll(
     @Param('id', ParseUUIDPipe) id: string,
-    @Query('filter', FilterPipe) where: Filter<StockEntryEntity>,
+    @Query('filter', FilterPipe) where: FindOptionsWhere<StockEntryEntity>,
     @Query('sort', SortPipe) order: OrderBy<StockEntryEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

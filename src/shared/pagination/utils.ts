@@ -1,10 +1,10 @@
 import { Filter } from './pageOptions.dto';
-import { WhereClause } from './filters';
 import { FilterParser } from './filter-parser';
+import { FindOptionsWhere } from 'typeorm/browser';
 
 export function parseFilterIntoQueryWhere<EntityType>(
   filter: Filter<EntityType>,
-): WhereClause<EntityType> {
+): FindOptionsWhere<EntityType> | Array<FindOptionsWhere<EntityType>> {
   if (!filter) return {};
 
   const where = new FilterParser(filter).generateQuery();

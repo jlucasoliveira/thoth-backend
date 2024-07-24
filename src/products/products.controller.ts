@@ -10,9 +10,10 @@ import {
   ParseIntPipe,
   ParseUUIDPipe,
 } from '@nestjs/common';
+import { FindOptionsRelations } from 'typeorm';
+import { FindOptionsWhere } from 'typeorm/browser';
 import { User } from '@/auth/guards/user.decorator';
 import { OrderBy } from '@/shared/pagination/filters';
-import { Filter } from '@/shared/pagination/pageOptions.dto';
 import {
   FilterPipe,
   IncludePipe,
@@ -26,7 +27,6 @@ import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { CreateProductVariationDTO } from './dto/create-product-variation.dto';
 import { UpdateProductVariationDTO } from './dto/update-product-variation.dto';
-import { FindOptionsRelations } from 'typeorm';
 
 @Controller('products')
 export class ProductsController {
@@ -54,8 +54,8 @@ export class ProductsController {
 
   @Get()
   findAll(
-    @Query('filter', FilterPipe) where: Filter<ProductEntity>,
     @Query('sort', SortPipe) order: OrderBy<ProductEntity>,
+    @Query('filter', FilterPipe) where: FindOptionsWhere<ProductEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
     @Query('include', IncludePipe)
@@ -73,7 +73,8 @@ export class ProductsController {
   @Get(':productId/variations')
   findAllVariations(
     @Param('productId', ParseIntPipe) productId: number,
-    @Query('filter', FilterPipe) where: Filter<ProductVariationEntity>,
+    @Query('filter', FilterPipe)
+    where: FindOptionsWhere<ProductVariationEntity>,
     @Query('sort', SortPipe) order: OrderBy<ProductVariationEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,

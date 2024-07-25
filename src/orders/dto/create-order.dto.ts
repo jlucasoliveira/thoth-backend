@@ -17,6 +17,10 @@ export class CreateOrderDTO {
   @IsOptional()
   paid?: boolean;
 
+  @IsBoolean()
+  @IsOptional()
+  persistStock?: boolean = true;
+
   @IsNumber()
   @IsOptional()
   totalPaid?: number;

@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { ProductVariationEntity } from '@/products/variations.entity';
 import { BaseEntityWithIdInt as BaseEntity } from '@/types/typeorm/base-entity';
 import { OrderEntity } from './orders.entity';
@@ -24,7 +24,7 @@ export class OrderItemEntity extends BaseEntity {
   @Column({ name: 'variation_id' })
   variationId: string;
 
-  @OneToMany(
+  @ManyToOne(
     () => ProductVariationEntity,
     (variation) => variation.orderedItems,
     { onDelete: 'NO ACTION' },

@@ -45,8 +45,12 @@ export class OrdersController {
   }
 
   @Get(':id')
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersService.findOne(id);
+  findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<OrderEntity>,
+  ) {
+    return this.ordersService.findOne(id, relations);
   }
 
   @Patch(':id')

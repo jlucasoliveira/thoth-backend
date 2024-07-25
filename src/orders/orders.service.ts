@@ -3,7 +3,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EntityManager, Repository } from 'typeorm';
+import { EntityManager, FindOptionsRelations, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ClientsService } from '@/clients/clients.service';
 import { PageOptions } from '@/shared/pagination/filters';
@@ -150,8 +150,15 @@ export class OrdersService {
     return { data, meta };
   }
 
-  async findOne(id: string, raiseException = true) {
-    const order = await this.orderRepository.findOne({ where: { id } });
+  async findOne(
+    id: string,
+    relations?: FindOptionsRelations<OrderEntity>,
+    raiseException = true,
+  ) {
+    const order = await this.orderRepository.findOne({
+      where: { id },
+      relations,
+    });
 
     if (!order && raiseException)
       throw new NotFoundException('Pedido não encontrado');

@@ -40,6 +40,7 @@ export class OrdersService {
     tx: EntityManager,
     orderId: string,
     orderItems: CreateOrderItemDTO[],
+    persistStock = true,
   ): Promise<ResolvedOrder> {
     let total = 0;
 
@@ -56,7 +57,8 @@ export class OrdersService {
           .select('variation.price', 'price')
           .addSelect('variation.variation', 'variation')
           .addSelect('COALESCE(stock.quantity, 0)', 'quantity')
-          .addSelect('product.name')
+          .addSelect('product.name', 'name')
+          .where('variation.id = :id', { id: variationId })
           .getRawOne<Variation>();
 
         if (!variation)
@@ -65,18 +67,20 @@ export class OrdersService {
             message: 'Produto não encontrado',
           });
 
-        if (variation.quantity < quantity)
-          throw new BadRequestException({
-            id: variationId,
-            message: `${variation.name} - ${variation.variation} sem estoque.`,
-          });
+        if (persistStock) {
+          if (variation.quantity < quantity)
+            throw new BadRequestException({
+              id: variationId,
+              message: `${variation.name} - ${variation.variation} sem estoque.`,
+            });
 
-        await tx
-          .getRepository(StockEntity)
-          .update(
-            { variationId },
-            { quantity: () => `quantity - ${quantity}` },
-          );
+          await tx
+            .getRepository(StockEntity)
+            .update(
+              { variationId },
+              { quantity: () => `quantity - ${quantity}` },
+            );
+        }
 
         total += variation.price * quantity;
 
@@ -115,6 +119,7 @@ export class OrdersService {
       tx,
       order.id,
       data.items,
+      data.persistStock,
     );
 
     const orderItemRepository = tx.getRepository(OrderItemEntity);

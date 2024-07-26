@@ -44,10 +44,7 @@ export class ClientsService {
   }
 
   async findAll(params: PageOptions<ClientEntity>) {
-    const [data, total] = await this.clientRepository.findAndCount({
-      ...params,
-      select: { id: true, name: true, createdAt: true, updatedAt: true },
-    });
+    const [data, total] = await this.clientRepository.findAndCount(params);
 
     const meta = new PageMetaDto({ itens: data.length, total, ...params });
 

@@ -1,4 +1,12 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  JoinTable,
+  ManyToMany,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { ClientEntity } from '@/clients/clients.entity';
 import { BaseEntity } from '@/types/typeorm/base-entity';
 import { UserEntity } from '@/users/users.entity';
@@ -14,6 +22,17 @@ export class OrderEntity extends BaseEntity {
     transformer: convertIntoBoolean('paid'),
   })
   paid: boolean;
+
+  @Column({
+    type: 'char',
+    name: 'retained_stock',
+    default: OracleBoolean.false,
+    transformer: convertIntoBoolean('retainedStock'),
+  })
+  retainedStock: boolean;
+
+  @Column({ type: 'smallint', default: 1 })
+  installments?: number;
 
   @Column({ type: 'float' })
   total: number;
@@ -43,12 +62,21 @@ export class OrderEntity extends BaseEntity {
   @JoinColumn({ name: 'seller_id' })
   seller: UserEntity;
 
-  @Column({ name: 'payment_id', nullable: true })
-  paymentId?: number;
-
-  @ManyToOne(() => PaymentEntity, (payment) => payment.orders, {
-    onDelete: 'SET NULL',
+  @ManyToMany(() => PaymentEntity, (payment) => payment.orders, {
+    onDelete: 'NO ACTION',
   })
-  @JoinColumn({ name: 'payment_id' })
-  payment?: PaymentEntity;
+  @JoinTable({
+    name: 'orders_payments',
+    joinColumn: {
+      name: 'order_id',
+      referencedColumnName: 'id',
+      foreignKeyConstraintName: 'FK_payments_to_order',
+    },
+    inverseJoinColumn: {
+      name: 'payment_id',
+      referencedColumnName: 'id',
+      foreignKeyConstraintName: 'FK_orders_to_payment',
+    },
+  })
+  payments: PaymentEntity[];
 }

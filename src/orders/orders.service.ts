@@ -40,7 +40,7 @@ export class OrdersService {
     tx: EntityManager,
     orderId: string,
     orderItems: CreateOrderItemDTO[],
-    persistStock = true,
+    retainedStock = false,
   ): Promise<ResolvedOrder> {
     let total = 0;
 
@@ -67,7 +67,7 @@ export class OrdersService {
             message: 'Produto não encontrado',
           });
 
-        if (persistStock) {
+        if (!retainedStock) {
           if (variation.quantity < quantity)
             throw new BadRequestException({
               id: variationId,
@@ -112,6 +112,7 @@ export class OrdersService {
         paid: data.paid,
         clientId: client.id,
         sellerId: seller.id,
+        installments: data.installments,
       }),
     );
 
@@ -119,7 +120,7 @@ export class OrdersService {
       tx,
       order.id,
       data.items,
-      data.persistStock,
+      data.retainedStock,
     );
 
     const orderItemRepository = tx.getRepository(OrderItemEntity);

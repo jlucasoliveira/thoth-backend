@@ -8,10 +8,14 @@ import {
   Post,
   Query,
 } from '@nestjs/common';
-import { FindOptionsWhere } from 'typeorm';
+import { FindOptionsRelations, FindOptionsWhere } from 'typeorm';
 import { User } from '@/auth/guards/user.decorator';
 import { OrderBy } from '@/shared/pagination/filters';
-import { FilterPipe, SortPipe } from '@/shared/pagination/filters.pipe';
+import {
+  FilterPipe,
+  IncludePipe,
+  SortPipe,
+} from '@/shared/pagination/filters.pipe';
 import { PaymentEntity } from './payments.entity';
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDTO } from './dto/create-payment.dto';
@@ -31,8 +35,16 @@ export class PaymentsController {
     @Query('sort', SortPipe) order: OrderBy<PaymentEntity>,
     @Query('skip', new ParseIntPipe({ optional: true })) skip: number = 0,
     @Query('take', new ParseIntPipe({ optional: true })) take: number = 10,
+    @Query('include', IncludePipe)
+    relations?: FindOptionsRelations<PaymentEntity>,
   ) {
-    return this.paymentsService.findAll({ order, skip, take, where });
+    return this.paymentsService.findAll({
+      order,
+      relations,
+      skip,
+      take,
+      where,
+    });
   }
 
   @Get(':id')

@@ -1,4 +1,10 @@
-import { IsNotEmpty, IsNumber, IsString, Length } from 'class-validator';
+import {
+  IsBoolean,
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateBrandDto {
   @IsString()
@@ -8,4 +14,7 @@ export class CreateBrandDto {
 
   @IsNumber()
   profitRate: number;
+
+  @IsBoolean()
+  isPublic: boolean;
 }

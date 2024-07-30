@@ -8,6 +8,8 @@ import {
   IsUUID,
   ArrayMinSize,
   ValidateNested,
+  ValidateIf,
+  IsPositive,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CreateOrderItemDTO } from './create-order-item.dto';
@@ -17,9 +19,15 @@ export class CreateOrderDTO {
   @IsOptional()
   paid?: boolean;
 
+  @IsNumber()
+  @IsOptional()
+  @IsPositive()
+  @ValidateIf((o) => o.paid)
+  installments?: number;
+
   @IsBoolean()
   @IsOptional()
-  persistStock?: boolean = true;
+  retainedStock?: boolean = false;
 
   @IsNumber()
   @IsOptional()

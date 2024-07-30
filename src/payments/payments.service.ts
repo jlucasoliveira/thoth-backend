@@ -4,6 +4,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PageMetaDto } from '@/shared/pagination/pageMeta.dto';
 import { PageOptions } from '@/shared/pagination/filters';
 import { OrderEntity } from '@/orders/orders.entity';
+import { PaymentOrderEntity } from './payment-order.entity';
 import { PaymentEntity } from './payments.entity';
 import { CreatePaymentDTO } from './dto/create-payment.dto';
 
@@ -16,14 +17,14 @@ export class PaymentsService {
 
   async create(user: Express.User, payload: CreatePaymentDTO) {
     return await this.paymentRepository.manager.transaction(async (tx) => {
-      const payment = tx
+      const payment = await tx
         .getRepository(PaymentEntity)
         .save(this.paymentRepository.create({ issuerId: user.id, ...payload }));
 
       const orderRepository = tx.getRepository(OrderEntity);
 
       const orders = await orderRepository.find({
-        where: { paid: false },
+        where: { paid: false, clientId: payload.clientId, id: payload.orderId },
         order: { createdAt: 'ASC' },
       });
 
@@ -55,7 +56,16 @@ export class PaymentsService {
         await orderRepository.update(unpaidOrder.id, {
           totalPaid: () => `totalPaid + ${unpaidOrder.value}`,
         });
+        paidIds.push(unpaidOrder.id);
       }
+
+      const paymentOrderRepository = tx.getRepository(PaymentOrderEntity);
+
+      await paymentOrderRepository.save(
+        paidIds.map((orderId) =>
+          paymentOrderRepository.create({ orderId, paymentId: payment.id }),
+        ),
+      );
 
       return { ...payment, change: totalValue };
     });

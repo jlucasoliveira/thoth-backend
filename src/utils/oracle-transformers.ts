@@ -10,6 +10,7 @@ export function convertIntoBoolean(resource: string): ValueTransformer {
     to(value) {
       if (typeof value === 'boolean')
         return value ? OracleBoolean.true : OracleBoolean.false;
+      if (typeof value === 'undefined') return OracleBoolean.false;
       throw new Error(
         `Invalid value (${value}, '${typeof value}') on ${resource}`,
       );

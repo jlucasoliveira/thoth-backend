@@ -1,4 +1,4 @@
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { Column, Entity, JoinColumn, ManyToMany, ManyToOne } from 'typeorm';
 import { BaseEntityWithIdInt } from '@/types/typeorm/base-entity';
 import { OrderEntity } from '@/orders/orders.entity';
 import { UserEntity } from '@/users/users.entity';
@@ -32,6 +32,8 @@ export class PaymentEntity extends BaseEntityWithIdInt {
   @JoinColumn({ name: 'issuer_id' })
   issuer: UserEntity;
 
-  @OneToMany(() => OrderEntity, (order) => order.payment)
+  @ManyToMany(() => OrderEntity, (order) => order.payments, {
+    onDelete: 'NO ACTION',
+  })
   orders: OrderEntity[];
 }

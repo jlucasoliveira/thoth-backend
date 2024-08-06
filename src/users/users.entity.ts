@@ -3,6 +3,7 @@ import { OracleBoolean, convertIntoBoolean } from '@/utils/oracle-transformers';
 import { BaseEntity } from '@/types/typeorm/base-entity';
 import { StockEntryEntity } from '@/stock/stock-entries.entity';
 import { OrderEntity } from '@/orders/orders.entity';
+import { BankAccountEntity } from '@/bank-accounts/bank-accounts.entity';
 
 @Entity({ name: 'users', orderBy: { createdAt: 'DESC' } })
 export class UserEntity extends BaseEntity {
@@ -38,4 +39,7 @@ export class UserEntity extends BaseEntity {
 
   @OneToMany(() => OrderEntity, (order) => order.seller)
   sales: OrderEntity[];
+
+  @OneToMany(() => BankAccountEntity, (account) => account.owner)
+  bankAccounts: BankAccountEntity[];
 }

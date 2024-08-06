@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { exclude } from '@/utils/exclude';
 import { UsersService } from '@/users/users.service';
 import { CreateUserDto } from '@/users/dto/create-user.dto';
 import { ChangePasswordDTO } from './dto/change-password.dto';
@@ -41,7 +42,7 @@ export class AuthService {
       { refresh: false, validateExists: false },
     );
 
-    return { accessToken };
+    return { accessToken, user: exclude(user, ['password']) };
   }
 
   createUser(payload: CreateUserDto) {

@@ -19,7 +19,8 @@
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "sentry:sourcemaps": "sentry-cli sourcemaps inject --org thoth-pc --project thoth-backend ./dist && sentry-cli sourcemaps upload --org thoth-pc --project thoth-backend ./dist",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli"
+    "execute": "ts-node -r tsconfig-paths/register",
+    "typeorm": "npm run execute -- ./node_modules/typeorm/cli"
   },
   "dependencies": {
     "@nestjs/axios": "^3.0.2",
@@ -89,6 +90,9 @@
     "tar": "^6.2.1",
     "@nestjs/graphql": {
       "ws": "^8.17.1"
+    },
+    "minio": {
+      "fast-xml-parser": "^4.4.1"
     }
   },
   "jest": {

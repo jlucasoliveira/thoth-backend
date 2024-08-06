@@ -172,12 +172,42 @@ export class FilterParser<T> {
     return Object.fromEntries(whereEntries);
   }
 
+  private prepareFilter() {
+    if (Array.isArray(this.filter) || this.filter === undefined)
+      return this.filter;
+
+    const keys = Object.keys(this.filter);
+
+    if (keys.length <= 1) return this.filter;
+
+    const keysAsNumber = keys.reduce(
+      (acc, cur) => (isNaN(+cur) ? acc : acc + 1),
+      0,
+    );
+
+    if (keys.length === keysAsNumber) return this.filter;
+
+    const globalFilters = [];
+    const commonFilters: Filter<T> = {};
+    Object.entries(this.filter).forEach(([key, filter]) => {
+      if (isNaN(+key)) commonFilters[key] = filter;
+      else globalFilters.push(filter);
+    });
+
+    return globalFilters.map((filter) => ({
+      ...commonFilters,
+      ...filter,
+    }));
+  }
+
   generateQuery(): FindOptionsWhere<T> | Array<FindOptionsWhere<T>> {
-    if (Array.isArray(this.filter)) {
-      if (this.filter.length > 0)
-        this.query = this.filter.map((filter) => this.buildQuery(filter));
-    } else if (this.filter) {
-      this.query = this.buildQuery(this.filter);
+    const filters = this.prepareFilter();
+
+    if (Array.isArray(filters)) {
+      if (filters.length > 0)
+        this.query = filters.map((filter) => this.buildQuery(filter));
+    } else if (filters) {
+      this.query = this.buildQuery(filters);
     }
 
     return this.query;

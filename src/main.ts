@@ -6,7 +6,7 @@ import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { ProfilingIntegration } from '@sentry/profiling-node';
 import * as Sentry from '@sentry/node';
 import { Logger } from 'nestjs-pino';
-import { SentryInterceptor } from '@/shared/interceptors/sentry.interceptor';
+import { DatabaseInterceptor, SentryInterceptor } from '@/shared/interceptors';
 import {
   SentryConfig,
   SentryConfigToken,
@@ -37,6 +37,7 @@ async function bootstrap() {
     ignoreErrors: [
       'NotFoundException',
       'BadRequestException',
+      'BadGatewayException',
       'UnauthorizedException',
     ],
   });
@@ -50,7 +51,7 @@ async function bootstrap() {
   });
 
   app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalInterceptors(new SentryInterceptor());
+  app.useGlobalInterceptors(new DatabaseInterceptor(), new SentryInterceptor());
 
   await app.listen(port);
 }

@@ -2,6 +2,7 @@ import {
   IsBoolean,
   IsNotEmpty,
   IsNumber,
+  IsOptional,
   IsString,
   Length,
 } from 'class-validator';
@@ -16,5 +17,6 @@ export class CreateBrandDto {
   profitRate: number;
 
   @IsBoolean()
-  isPublic: boolean;
+  @IsOptional()
+  isPublic = true;
 }

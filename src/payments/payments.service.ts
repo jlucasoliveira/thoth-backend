@@ -7,19 +7,27 @@ import { OrderEntity } from '@/orders/orders.entity';
 import { PaymentOrderEntity } from './payment-order.entity';
 import { PaymentEntity } from './payments.entity';
 import { CreatePaymentDTO } from './dto/create-payment.dto';
+import { BankAccountsService } from '@/bank-accounts/bank-accounts.service';
 
 @Injectable()
 export class PaymentsService {
   constructor(
     @InjectRepository(PaymentEntity)
     private readonly paymentRepository: Repository<PaymentEntity>,
+    private readonly accountService: BankAccountsService,
   ) {}
 
   async create(user: Express.User, payload: CreatePaymentDTO) {
+    await this.accountService.findOne(payload.accountId);
+
     return await this.paymentRepository.manager.transaction(async (tx) => {
-      const payment = await tx
-        .getRepository(PaymentEntity)
-        .save(this.paymentRepository.create({ issuerId: user.id, ...payload }));
+      const payment = await tx.getRepository(PaymentEntity).save(
+        this.paymentRepository.create({
+          issuerId: user.id,
+          bankAccountId: payload.accountId,
+          ...payload,
+        }),
+      );
 
       const orderRepository = tx.getRepository(OrderEntity);
 

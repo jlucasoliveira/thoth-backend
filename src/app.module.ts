@@ -23,6 +23,7 @@ import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AttachmentsModule } from './attachments/attachments.module';
+import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { AttachmentsModule } from './attachments/attachments.module';
     ClientsModule,
     OrdersModule,
     PaymentsModule,
+    BankAccountsModule,
   ],
   providers: [
     {

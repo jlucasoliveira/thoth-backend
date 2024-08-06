@@ -4,8 +4,9 @@ import {
   Injectable,
   NestInterceptor,
   BadGatewayException,
+  BadRequestException,
 } from '@nestjs/common';
-import { QueryFailedError } from 'typeorm';
+import { EntityPropertyNotFoundError, QueryFailedError } from 'typeorm';
 import { catchError, throwError } from 'rxjs';
 
 interface DBError extends Error {
@@ -26,6 +27,11 @@ export class DatabaseInterceptor implements NestInterceptor {
               error,
             );
           }
+        } else if (error instanceof EntityPropertyNotFoundError) {
+          error = new BadRequestException(
+            'Filtro inválido. Entidade não possui essa propriedade.',
+            error,
+          );
         }
         return throwError(() => error);
       }),

@@ -3,6 +3,7 @@ import { BaseEntityWithIdInt } from '@/types/typeorm/base-entity';
 import { OrderEntity } from '@/orders/orders.entity';
 import { UserEntity } from '@/users/users.entity';
 import { ClientEntity } from '@/clients/clients.entity';
+import { BankAccountEntity } from '@/bank-accounts/bank-accounts.entity';
 
 @Entity({ name: 'payments' })
 export class PaymentEntity extends BaseEntityWithIdInt {
@@ -36,4 +37,14 @@ export class PaymentEntity extends BaseEntityWithIdInt {
     onDelete: 'NO ACTION',
   })
   orders: OrderEntity[];
+
+  @Column({ name: 'account_id', nullable: true })
+  bankAccountId?: number;
+
+  @ManyToOne(() => BankAccountEntity, (account) => account.payments, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'account_id' })
+  bankAccount?: BankAccountEntity;
 }

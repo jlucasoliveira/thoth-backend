@@ -12,4 +12,7 @@ export class CreatePaymentDTO {
   @IsUUID()
   @IsOptional()
   orderId?: string;
+
+  @IsNumber()
+  accountId: number;
 }

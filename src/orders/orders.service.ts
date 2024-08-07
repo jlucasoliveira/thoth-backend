@@ -45,7 +45,7 @@ export class OrdersService {
     let total = 0;
 
     const promises = orderItems.map<Promise<Item>>(
-      async ({ variationId, quantity }) => {
+      async ({ variationId, price, quantity }) => {
         const variation = await this.variationRepository
           .createQueryBuilder('variation')
           .leftJoin(StockEntity, 'stock', 'stock.variation_id = variation.id')
@@ -82,14 +82,17 @@ export class OrdersService {
             );
         }
 
-        total += variation.price * quantity;
+        const itemPrice = price ?? variation.price;
+        const itemTotal = itemPrice * quantity;
+
+        total += itemTotal;
 
         return {
           orderId,
           quantity,
           variationId,
-          value: variation.price,
-          total: variation.price * quantity,
+          value: itemPrice,
+          total: itemTotal,
         };
       },
     );

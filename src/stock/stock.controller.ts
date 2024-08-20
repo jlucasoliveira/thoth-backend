@@ -18,7 +18,6 @@ import {
 } from '@/shared/pagination/filters.pipe';
 import { User } from '@/auth/guards/user.decorator';
 import { OrderBy } from '@/shared/pagination/filters';
-import { Filter } from '@/shared/pagination/pageOptions.dto';
 import { StockEntryEntity } from './stock-entries.entity';
 import { StockService } from './stock.service';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';

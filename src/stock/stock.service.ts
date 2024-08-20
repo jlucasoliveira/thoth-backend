@@ -25,7 +25,10 @@ export class StockService {
     private readonly variationService: VariationsServices,
   ) {}
 
-  async create(variationId: string, quantity: number) {
+  async create(
+    variationId: string,
+    quantity: number,
+  ): Promise<StockEntity & { isNew?: boolean }> {
     const stock = await this.findOneByProductId(variationId, false);
 
     if (!stock) {
@@ -34,9 +37,11 @@ export class StockService {
           'Não é possível remover de um estoque inexistente',
         );
 
-      return await this.stockRepository.save(
+      const newStock = await this.stockRepository.save(
         this.stockRepository.create({ quantity, variationId }),
       );
+
+      return { ...newStock, isNew: true };
     }
 
     return stock;
@@ -75,7 +80,7 @@ export class StockService {
 
     const operation = data.kind === StockKind.ENTRY ? '+' : '-';
 
-    if (stock.quantity !== data.amount) {
+    if (!stock.isNew) {
       await this.stockRepository.update(stock.id, {
         quantity: () => `quantity ${operation} ${Math.abs(data.amount)}`,
       });

@@ -20,10 +20,12 @@ import { CreateOrderDTO } from './dto/create-order.dto';
 import { Item, ResolvedOrder } from './types';
 
 type Variation = {
+  id: string;
   name: string;
   variation?: string;
   price: number;
   quantity: number;
+  stockId: string;
 };
 
 @Injectable()
@@ -40,26 +42,14 @@ export class OrdersService {
     tx: EntityManager,
     orderId: string,
     orderItems: CreateOrderItemDTO[],
+    variations: Map<string, Variation>,
     retainedStock = false,
   ): Promise<ResolvedOrder> {
     let total = 0;
 
     const promises = orderItems.map<Promise<Item>>(
       async ({ variationId, price, quantity }) => {
-        const variation = await this.variationRepository
-          .createQueryBuilder('variation')
-          .leftJoin(StockEntity, 'stock', 'stock.variation_id = variation.id')
-          .leftJoin(
-            ProductEntity,
-            'product',
-            'product.id = variation.product_id',
-          )
-          .select('variation.price', 'price')
-          .addSelect('variation.variation', 'variation')
-          .addSelect('COALESCE(stock.quantity, 0)', 'quantity')
-          .addSelect('product.name', 'name')
-          .where('variation.id = :id', { id: variationId })
-          .getRawOne<Variation>();
+        const variation = variations.get(variationId);
 
         if (!variation)
           throw new NotFoundException({
@@ -77,7 +67,7 @@ export class OrdersService {
           await tx
             .getRepository(StockEntity)
             .update(
-              { variationId },
+              { id: variation.stockId },
               { quantity: () => `quantity - ${quantity}` },
             );
         }
@@ -106,6 +96,7 @@ export class OrdersService {
     tx: EntityManager,
     client: ClientEntity,
     seller: Express.User,
+    variations: Map<string, Variation>,
     data: CreateOrderDTO,
   ) {
     const orderRepository = tx.getRepository(OrderEntity);
@@ -123,6 +114,7 @@ export class OrdersService {
       tx,
       order.id,
       data.items,
+      variations,
       data.retainedStock,
     );
 
@@ -141,8 +133,28 @@ export class OrdersService {
   async create(seller: Express.User, data: CreateOrderDTO) {
     const client = await this.clientService.findOneOrDefault(data.clientId);
 
+    const variations = await this.variationRepository
+      .createQueryBuilder('variation')
+      .leftJoin(StockEntity, 'stock', 'stock.variation_id = variation.id')
+      .leftJoin(ProductEntity, 'product', 'product.id = variation.product_id')
+      .select('variation.id', 'id')
+      .addSelect('stock.id', 'stockId')
+      .addSelect('variation.price', 'price')
+      .addSelect('variation.variation', 'variation')
+      .addSelect('COALESCE(stock.quantity, 0)', 'quantity')
+      .addSelect('product.name', 'name')
+      .where('variation.id IN (:...ids)', {
+        ids: data.items.map(({ variationId }) => variationId),
+      })
+      .getRawMany<Variation>();
+
+    const mappedVariations = new Map<string, Variation>(
+      variations.map((variation) => [variation.id, variation]),
+    );
+
     await this.orderRepository.manager.transaction(
-      async (tx) => await this._create(tx, client, seller, data),
+      async (tx) =>
+        await this._create(tx, client, seller, mappedVariations, data),
     );
   }
 

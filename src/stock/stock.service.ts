@@ -13,6 +13,7 @@ import { StockEntity } from './stock.entity';
 import { StockEntryEntity } from './stock-entries.entity';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 import { UpdateStockDTO } from './dto/update-stock.dto';
+import { BatchEntriesDTO } from './dto/batch-entries.dto';
 import { StockKind } from './constants';
 
 @Injectable()
@@ -93,6 +94,14 @@ export class StockService {
     }
 
     return entry;
+  }
+
+  async createBatchEntries(user: Express.User, { entries }: BatchEntriesDTO) {
+    return await Promise.all(
+      entries.map(({ variationId, ...entry }) =>
+        this.createStockEntry(entry, user, variationId),
+      ),
+    );
   }
 
   async findEntries(props: PageOptions<StockEntryEntity>) {

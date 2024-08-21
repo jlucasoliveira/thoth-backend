@@ -22,6 +22,7 @@ import { StockEntryEntity } from './stock-entries.entity';
 import { StockService } from './stock.service';
 import { CreateStockEntryDto } from './dto/create-stock-entry.dto';
 import { UpdateStockDTO } from './dto/update-stock.dto';
+import { BatchEntriesDTO } from './dto/batch-entries.dto';
 
 @Controller(['stock', 'variations/:variationId/stock'])
 export class StockController {
@@ -51,6 +52,14 @@ export class StockController {
       user,
       variationId,
     );
+  }
+
+  @Post('batch-entry')
+  createBatchEntries(
+    @User() user: Express.User,
+    @Body() payload: BatchEntriesDTO,
+  ) {
+    return this.stockService.createBatchEntries(user, payload);
   }
 
   @Get('entries')

@@ -8,8 +8,8 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreateStockEntryDto } from './create-stock-entry.dto';
 import { OmitType } from '@nestjs/mapped-types';
+import { CreateStockEntryDto } from './create-stock-entry.dto';
 
 export class EntryDTO extends OmitType(CreateStockEntryDto, ['newValue']) {
   @IsString()

@@ -21,11 +21,18 @@ export class DatabaseInterceptor implements NestInterceptor {
     return next.handle().pipe(
       catchError((error) => {
         if (error instanceof QueryFailedError) {
-          if ((error as QueryFailedError & DBError).code == 'ORA-02292') {
+          if ((error as QueryFailedError & DBError).code === 'ORA-02292') {
             error = new BadGatewayException(
               'Erro de integridade. A operação não pode ser finalizada.',
               error,
             );
+          } else if (
+            (error as QueryFailedError & DBError).code === 'ORA-00001'
+          ) {
+            const message = error.message.includes('unique_external_code')
+              ? 'Código de referência já existe!'
+              : 'Algum dos atributos inseridos já existem no sistema!';
+            error = new BadRequestException(message, error);
           }
         } else if (error instanceof EntityPropertyNotFoundError) {
           error = new BadRequestException(

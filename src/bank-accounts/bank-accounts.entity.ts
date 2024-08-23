@@ -1,7 +1,8 @@
+import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
+import { UserEntity } from '@/users/users.entity';
+import { ExpenseEntity } from '@/expenses/expenses.entity';
 import { PaymentEntity } from '@/payments/payments.entity';
 import { BaseEntityWithIdInt } from '@/types/typeorm/base-entity';
-import { UserEntity } from '@/users/users.entity';
-import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from 'typeorm';
 
 @Entity({ name: 'bank_accounts' })
 export class BankAccountEntity extends BaseEntityWithIdInt {
@@ -33,4 +34,9 @@ export class BankAccountEntity extends BaseEntityWithIdInt {
     onDelete: 'NO ACTION',
   })
   payments: PaymentEntity[];
+
+  @OneToMany(() => ExpenseEntity, (expense) => expense.bankAccount, {
+    onDelete: 'NO ACTION',
+  })
+  expenses: ExpenseEntity[];
 }

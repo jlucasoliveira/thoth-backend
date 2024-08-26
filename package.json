@@ -93,7 +93,8 @@
     },
     "minio": {
       "fast-xml-parser": "^4.4.1"
-    }
+    },
+    "micromatch": "^4.0.8"
   },
   "jest": {
     "moduleFileExtensions": [

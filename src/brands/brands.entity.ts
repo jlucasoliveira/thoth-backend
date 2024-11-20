@@ -1,6 +1,7 @@
 import { Column, Entity, OneToMany } from 'typeorm';
 import { ExpenseEntity } from '@/expenses/expenses.entity';
 import { ProductEntity } from '@/products/products.entity';
+import { CategoryEntity } from '@/categories/categories.entity';
 import { BaseEntityWithIdInt as BaseEntity } from '@/types/typeorm/base-entity';
 import { OracleBoolean, convertIntoBoolean } from '@/utils/oracle-transformers';
 
@@ -25,4 +26,7 @@ export class BrandEntity extends BaseEntity {
 
   @OneToMany(() => ExpenseEntity, (expense) => expense.brand)
   expenses: ExpenseEntity[];
+
+  @OneToMany(() => CategoryEntity, (category) => category.brand)
+  categories: CategoryEntity[];
 }

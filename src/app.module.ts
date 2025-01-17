@@ -21,6 +21,7 @@ import { BrandsModule } from './brands/brands.module';
 import { ClientsModule } from './clients/clients.module';
 import { ProductsModule } from './products/products.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ReportsModule } from './reports/reports.module';
 import { CategoriesModule } from './categories/categories.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
@@ -55,6 +56,7 @@ import { ExpensesModule } from './expenses/expenses.module';
     PaymentsModule,
     BankAccountsModule,
     ExpensesModule,
+    ReportsModule,
   ],
   providers: [
     {

@@ -17,6 +17,6 @@ import { ProductVariationEntity } from './variations.entity';
   ],
   controllers: [ProductsController, VariationsController],
   providers: [ProductsService, VariationsServices],
-  exports: [ProductsService, VariationsServices],
+  exports: [ProductsService, VariationsServices, TypeOrmModule],
 })
 export class ProductsModule {}

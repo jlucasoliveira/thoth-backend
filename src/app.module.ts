@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD } from '@nestjs/core';
+import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import {
   databaseFactory,
@@ -26,6 +27,7 @@ import { CategoriesModule } from './categories/categories.module';
 import { AttachmentsModule } from './attachments/attachments.module';
 import { BankAccountsModule } from './bank-accounts/bank-accounts.module';
 import { ExpensesModule } from './expenses/expenses.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [
@@ -44,6 +46,7 @@ import { ExpensesModule } from './expenses/expenses.module';
       inject: [ConfigService],
       useFactory: databaseFactory,
     }),
+    ScheduleModule.forRoot(),
     UsersModule,
     AuthModule,
     BrandsModule,
@@ -57,6 +60,7 @@ import { ExpensesModule } from './expenses/expenses.module';
     BankAccountsModule,
     ExpensesModule,
     ReportsModule,
+    HealthModule,
   ],
   providers: [
     {
